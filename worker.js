@@ -1960,6 +1960,11 @@ async function handleSignup(){
   await new Promise(r=>setTimeout(r, 400));
   await enterApp();
   showToast('Welcome to Keepsafe, ' + name + '!');
+  try{
+    await syncVaultToCloud(true);
+  }catch(e){
+    console.warn('Initial cloud signup sync notice:', e);
+  }
 }
 
 async function handleLogin(){
@@ -1976,7 +1981,56 @@ async function handleLogin(){
   const users = getUsers();
 
   if(!users[key]){
-    err.textContent = 'No account found with this name.';
+    // Auto-check Cloudflare Sync if on workers.dev or cloud is configured
+    const cloudCfg = getCloudConfig();
+    const cfUrl = cloudCfg.cfUrl || (typeof window !== 'undefined' && window.location.origin && window.location.origin.includes('workers.dev') ? window.location.origin : '');
+    if(cfUrl){
+      btn.classList.add('loading');
+      err.textContent = 'Checking cloud vault for this account...';
+      try{
+        const testCfg = { provider: 'cloudflare', cfUrl: cfUrl, url: cfUrl, autosync: true, syncOnOpen: true };
+        const resData = await pullFromCloudflare(testCfg, key);
+        if(resData){
+          const rawEncrypted = resData.encrypted_data || resData;
+          const hash = await sha256(pass);
+          const decrypted = await decryptVaultPayload(rawEncrypted, hash);
+          const restoredUser = decrypted.user || {
+            name: name,
+            passHash: hash,
+            docsKey: 'keepsafe_docs_' + key,
+            createdAt: new Date().toISOString()
+          };
+          const curUsers = getUsers();
+          curUsers[key] = restoredUser;
+          saveUsers(curUsers);
+          saveCloudConfig(testCfg);
+
+          if(Array.isArray(decrypted.docs)){
+            for(const doc of decrypted.docs){
+              doc.userKey = key;
+              await dbPutDoc(doc);
+            }
+          }
+
+          currentUser = restoredUser;
+          currentUser._key = key;
+          sessionStorage.setItem(LS_SESSION, key);
+          if(remember) localStorage.setItem(LS_REMEMBER, key);
+
+          btn.classList.remove('loading');
+          err.textContent = '';
+          await enterApp();
+          showToast(\`Welcome back, \${name}! Vault synced from Cloudflare.\`);
+          return;
+        }
+      }catch(cloudErr){
+        console.warn('Cloud auto-login fallback notice:', cloudErr);
+      }finally{
+        btn.classList.remove('loading');
+      }
+    }
+
+    err.textContent = 'No account found on this device. Click "I-restore mula sa Cloud" below to restore your account.';
     return;
   }
 
@@ -2573,17 +2627,23 @@ const LS_LAST_SYNC = 'keepsafe_last_sync_v2';
 
 function getCloudConfig(){
   try{
-    const cfg = JSON.parse(localStorage.getItem(LS_CLOUD_CONFIG) || '{}');
-    if(!cfg.cfUrl && typeof window !== 'undefined' && window.location.origin && window.location.origin.includes('workers.dev')){
+    let cfg = JSON.parse(localStorage.getItem(LS_CLOUD_CONFIG) || '{}');
+    const defaultUrl = (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) 
+      ? window.location.origin 
+      : 'https://safira.gbrielsales11.workers.dev';
+
+    if(!cfg.cfUrl || !cfg.url){
       cfg.provider = 'cloudflare';
-      cfg.cfUrl = window.location.origin;
-      cfg.url = window.location.origin;
+      cfg.cfUrl = defaultUrl;
+      cfg.url = defaultUrl;
       cfg.autosync = true;
       cfg.syncOnOpen = true;
-      localStorage.setItem(LS_CLOUD_CONFIG, JSON.stringify(cfg));
+      try{ localStorage.setItem(LS_CLOUD_CONFIG, JSON.stringify(cfg)); }catch(e){}
     }
     return cfg;
-  } catch(e){ return {}; }
+  } catch(e){ 
+    return { provider: 'cloudflare', cfUrl: 'https://safira.gbrielsales11.workers.dev', url: 'https://safira.gbrielsales11.workers.dev', autosync: true, syncOnOpen: true };
+  }
 }
 function saveCloudConfig(cfg){
   localStorage.setItem(LS_CLOUD_CONFIG, JSON.stringify(cfg));
