@@ -645,6 +645,68 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
+.provider-switch-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.provider-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.provider-pill:hover {
+  border-color: var(--border-soft);
+  color: var(--text);
+}
+.provider-pill.active {
+  background: var(--surface-3);
+  border-color: var(--brass);
+  color: var(--brass-bright);
+  box-shadow: 0 0 10px rgba(200, 155, 76, 0.15);
+}
+.btn-test-connection {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--brass-bright);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  transition: all 0.15s ease;
+}
+.btn-test-connection:hover {
+  background: rgba(200, 155, 76, 0.08);
+  border-color: var(--brass);
+}
+.storage-persist-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-s);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 12.5px;
+}
+
 .cloud-status-card {
   background: var(--surface-2);
   border: 1px solid var(--border-soft);
@@ -808,6 +870,17 @@
   border-radius: var(--radius-s);
   background: var(--surface);
   color: var(--text);
+}
+
+
+/* Ensure Cloud & Backup button responsiveness */
+#sidebar-cloud-item, #top-cloud-btn, .recover-trigger-btn {
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#sidebar-cloud-item *, #top-cloud-btn * {
+  pointer-events: none;
 }
 
 </style>
@@ -1116,7 +1189,7 @@
 
 
 <!-- ============ GATE RECOVERY MODAL ============ -->
-<div class="overlay" id="gate-recover-overlay" style="display:none;">
+<div class="overlay" id="gate-recover-overlay">
   <div class="modal modal-wide">
     <div class="modal-head">
       <div>
@@ -1128,7 +1201,7 @@
     <div class="modal-body">
       <div class="cloud-tabs">
         <button class="cloud-tab active" id="tab-btn-rec-file" onclick="switchRecTab('file')">📦 Mula sa .vault File</button>
-        <button class="cloud-tab" id="tab-btn-rec-cloud" onclick="switchRecTab('cloud')">☁️ Mula sa Supabase Cloud</button>
+        <button class="cloud-tab" id="tab-btn-rec-cloud" onclick="switchRecTab('cloud')">☁️ Mula sa Cloud (Cloudflare / Supabase)</button>
       </div>
 
       <!-- Recover via File -->
@@ -1158,17 +1231,43 @@
 
       <!-- Recover via Cloud -->
       <div id="rec-tab-cloud" style="display:none;">
-        <p style="font-size:13px; color:var(--text-dim); margin-bottom:14px; line-height:1.5;">
-          I-konekta sa iyong Supabase project upang i-download at i-decrypt ang iyong naka-sync na vault data.
+        <p style="font-size:13px; color:var(--text-dim); margin-bottom:12px; line-height:1.5;">
+          I-konekta sa iyong Cloudflare Worker o Supabase upang i-download at i-decrypt ang iyong naka-sync na vault data.
         </p>
-        <div class="field">
-          <label>Supabase Project URL</label>
-          <input type="text" id="rec-cloud-url" placeholder="https://xxxxxxxx.supabase.co">
+
+        <div class="provider-switch-row" style="margin-bottom:14px;">
+          <button type="button" class="provider-pill active" id="rec-prov-cf" onclick="switchRecProvider('cloudflare')">
+            <span>☁️ Cloudflare</span>
+          </button>
+          <button type="button" class="provider-pill" id="rec-prov-sb" onclick="switchRecProvider('supabase')">
+            <span>⚡ Supabase</span>
+          </button>
         </div>
-        <div class="field">
-          <label>Supabase Anon Public Key</label>
-          <input type="password" id="rec-cloud-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+
+        <!-- Cloudflare Recovery Fields -->
+        <div id="rec-fields-cf">
+          <div class="field">
+            <label>Cloudflare Worker URL</label>
+            <input type="text" id="rec-cf-url" placeholder="https://keepsafe-vault.yourname.workers.dev">
+          </div>
+          <div class="field">
+            <label>Sync Secret Token (Kung mayroon)</label>
+            <input type="password" id="rec-cf-token" placeholder="Opsyonal: secret key">
+          </div>
         </div>
+
+        <!-- Supabase Recovery Fields -->
+        <div id="rec-fields-sb" style="display:none;">
+          <div class="field">
+            <label>Supabase Project URL</label>
+            <input type="text" id="rec-cloud-url" placeholder="https://xxxxxxxx.supabase.co">
+          </div>
+          <div class="field">
+            <label>Supabase Anon Public Key</label>
+            <input type="password" id="rec-cloud-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+          </div>
+        </div>
+
         <div class="field">
           <label>Username / Account Name</label>
           <input type="text" id="rec-cloud-user" placeholder="Pangalan na ginamit sa vault">
@@ -1193,18 +1292,18 @@
 </div>
 
 <!-- ============ CLOUD & BACKUP MODAL ============ -->
-<div class="overlay" id="cloud-overlay" style="display:none;">
+<div class="overlay" id="cloud-overlay">
   <div class="modal modal-wide">
     <div class="modal-head">
       <div>
         <h2>Cloud Sync & Backup Vault</h2>
-        <div style="font-size:12px; color:var(--text-dim); margin-top:3px;">Proteksyon laban sa pagbura ng data ng browser</div>
+        <div style="font-size:12px; color:var(--text-dim); margin-top:3px;">Permanenteng proteksyon at awtomatikong sync kahit isara ang app</div>
       </div>
       <button class="icon-btn" onclick="closeCloudModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="cloud-tabs">
-        <button class="cloud-tab active" id="tab-btn-sync" onclick="switchCloudTab('sync')">☁️ Supabase Cloud Auto-Sync</button>
+        <button class="cloud-tab active" id="tab-btn-sync" onclick="switchCloudTab('sync')">☁️ Cloud Auto-Sync</button>
         <button class="cloud-tab" id="tab-btn-file" onclick="switchCloudTab('file')">📦 One-Click .vault Backup</button>
       </div>
 
@@ -1216,32 +1315,83 @@
             <span class="status-time" id="cloud-last-sync-time">Last sync: Never</span>
           </div>
           <div class="cloud-status-desc" id="cloud-status-desc">
-            Ikonekta sa libreng Supabase project para automatic na naka-backup ang lahat ng files sa cloud.
+            Ikonekta sa Cloudflare Worker o Supabase para awtomatikong naka-save ang lahat ng iyong dokumento sa cloud.
           </div>
+        </div>
+
+        <div class="storage-persist-card">
+          <div>
+            <strong style="color:var(--text); display:block; margin-bottom:2px;">🛡️ Proteksyon ng Browser Storage</strong>
+            <span id="storage-persist-text" style="color:var(--text-dim); font-size:12px;">Pumipigil sa browser na kusang burahin ang iyong local cache</span>
+          </div>
+          <button type="button" class="btn btn-ghost" id="btn-request-persist" onclick="enableStoragePersistence()" style="font-size:12px; padding:5px 10px;">
+            I-lock ang Storage
+          </button>
         </div>
 
         <div class="e2ee-callout">
           <div class="e2ee-ic">🔒</div>
           <div>
             <strong>End-to-End Encrypted (AES-GCM 256-bit)</strong>
-            <p>Lahat ng files at detalye ay ine-encrypt gamit ang iyong master key bago i-upload sa cloud. Walang makakabasa nito maliban sa iyo.</p>
+            <p>Lahat ng files ay ini-encrypt ng iyong sariling password bago umalis ng browser. Kahit ang Cloudflare ay hindi mababasa ang laman nito.</p>
           </div>
         </div>
 
-        <div class="field">
-          <label>Supabase Project URL</label>
-          <input type="text" id="cfg-cloud-url" placeholder="https://xxxxxxxxxxxx.supabase.co">
+        <!-- Provider Switcher -->
+        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:6px;">PILIIN ANG CLOUD PROVIDER</label>
+        <div class="provider-switch-row">
+          <button type="button" class="provider-pill active" id="prov-btn-cf" onclick="switchCloudProvider('cloudflare')">
+            <span>☁️ Cloudflare Workers KV</span>
+          </button>
+          <button type="button" class="provider-pill" id="prov-btn-sb" onclick="switchCloudProvider('supabase')">
+            <span>⚡ Supabase Database</span>
+          </button>
         </div>
 
-        <div class="field">
-          <label>Supabase Public Anon Key</label>
-          <input type="password" id="cfg-cloud-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+        <!-- Cloudflare Provider Settings -->
+        <div id="provider-section-cf">
+          <div class="field">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label>Cloudflare Worker URL</label>
+              <button type="button" class="btn-test-connection" id="btn-test-cf" onclick="testCloudflareConnection()">
+                <span class="btn-spinner"></span>
+                <span>Subukan ang Koneksyon</span>
+              </button>
+            </div>
+            <input type="text" id="cfg-cf-url" placeholder="https://keepsafe-vault.yourname.workers.dev">
+            <div class="field-hint">Ang iyong libreng Cloudflare Worker endpoint na tumatanggap ng encrypted vault data.</div>
+          </div>
+
+          <div class="field">
+            <label>Sync Secret Token <span style="color:var(--text-faint); font-weight:normal;">(Opsyonal / Dagdag Seguridad)</span></label>
+            <input type="password" id="cfg-cf-token" placeholder="Halimbawa: my-private-vault-token-123">
+          </div>
+        </div>
+
+        <!-- Supabase Provider Settings -->
+        <div id="provider-section-sb" style="display:none;">
+          <div class="field">
+            <label>Supabase Project URL</label>
+            <input type="text" id="cfg-cloud-url" placeholder="https://xxxxxxxxxxxx.supabase.co">
+          </div>
+
+          <div class="field">
+            <label>Supabase Public Anon Key</label>
+            <input type="password" id="cfg-cloud-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          </div>
+        </div>
+
+        <div class="remember-row" style="margin-bottom:10px;">
+          <label class="remember-check">
+            <input type="checkbox" id="cfg-cloud-autosync" checked>
+            Auto-sync kapag nagdagdag, nagbago, o nagbura ng file
+          </label>
         </div>
 
         <div class="remember-row" style="margin-bottom:18px;">
           <label class="remember-check">
-            <input type="checkbox" id="cfg-cloud-autosync" checked>
-            Auto-sync sa cloud kapag nagdagdag, nag-edit, o nagbura ng file
+            <input type="checkbox" id="cfg-cloud-reopen-sync" checked>
+            Auto-sync sa pagbukas ng app (I-download ang pinakabagong bersyon)
           </label>
         </div>
 
@@ -1259,9 +1409,61 @@
           </button>
         </div>
 
+        <!-- Cloudflare Setup Guide Collapsible -->
+        <details class="setup-details" id="setup-guide-cf" style="margin-top:20px;" open>
+          <summary>☁️ Paano i-setup ang Cloudflare Worker (Libre, 2 minuto lang)</summary>
+          <div class="setup-guide-content">
+            <ol>
+              <li>Pumunta sa <a href="https://dash.cloudflare.com" target="_blank" rel="noopener" style="color:var(--brass-bright); text-decoration:underline;">dash.cloudflare.com</a> at mag-login / mag-sign up nang libre.</li>
+              <li>Pindutin ang <strong>Workers & Pages</strong> &gt; <strong>Create application</strong> &gt; <strong>Create Worker</strong>.</li>
+              <li>Pangalanan ito (hal. <code>keepsafe-vault</code>) at i-click ang <strong>Deploy</strong>.</li>
+              <li>Pindutin ang <strong>Edit code</strong>, burahin ang default code, at i-paste ang Cloudflare Worker code sa ibaba:</li>
+            </ol>
+            <div class="sql-box-wrap" style="margin-bottom:12px;">
+              <button class="btn-copy-sql" onclick="copyWorkerCode()" style="position:relative; right:auto; top:auto; width:100%; padding:10px; font-size:13px; margin-bottom:8px;">
+                📋 Kopyahin ang Kumpletong Cloudflare Worker Code
+              </button>
+              <pre id="cf-worker-code-preview" style="max-height:160px; overflow-y:auto; font-size:11px;">// Cloudflare Worker para sa Keepsafe Vault Sync
+export default {
+  async fetch(request, env) {
+    const cors = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Sync-Secret',
+    };
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+    const url = new URL(request.url);
+    if (url.pathname === '/health') {
+      return new Response(JSON.stringify({ status: 'ok', service: 'Keepsafe Vault' }), { headers: cors });
+    }
+    if (url.pathname === '/api/vault') {
+      if (request.method === 'GET') {
+        const uid = url.searchParams.get('user_id');
+        const data = env.VAULT_KV ? await env.VAULT_KV.get('vault:' + uid) : null;
+        if (!data) return new Response(JSON.stringify({ found: false }), { headers: cors });
+        return new Response(JSON.stringify({ found: true, encrypted_data: JSON.parse(data) }), { headers: cors });
+      }
+      if (request.method === 'POST') {
+        const { user_id, encrypted_data } = await request.json();
+        if (env.VAULT_KV) await env.VAULT_KV.put('vault:' + user_id, JSON.stringify(encrypted_data));
+        return new Response(JSON.stringify({ success: true }), { headers: cors });
+      }
+    }
+    return new Response('Keepsafe Worker Online', { headers: cors });
+  }
+};</pre>
+            </div>
+            <ol start="5">
+              <li>Pindutin ang <strong>Save and Deploy</strong> sa Cloudflare editor.</li>
+              <li><em>(Para sa permanenteng storage)</em>: Sa Worker page &gt; <strong>Settings</strong> &gt; <strong>Variables and KV</strong> &gt; Mag-bind ng KV namespace na pinangalanang <code>VAULT_KV</code>.</li>
+              <li>Kopyahin ang worker URL (hal. <code>https://keepsafe-vault.yourname.workers.dev</code>) at i-paste sa itaas!</li>
+            </ol>
+          </div>
+        </details>
+
         <!-- Supabase Setup Guide Collapsible -->
-        <details class="setup-details" style="margin-top:20px;">
-          <summary>📖 Paano kumuha ng libreng Supabase URL & Key (1 minuto lang)</summary>
+        <details class="setup-details" id="setup-guide-sb" style="margin-top:14px; display:none;">
+          <summary>📖 Paano kumuha ng libreng Supabase URL & Key</summary>
           <div class="setup-guide-content">
             <ol>
               <li>Pumunta sa <a href="https://supabase.com" target="_blank" rel="noopener" style="color:var(--brass-bright); text-decoration:underline;">supabase.com</a> at mag-sign up nang libre.</li>
@@ -1718,6 +1920,8 @@ async function enterApp(){
   document.getElementById('app').classList.add('ready');
   updateCloudStatusUI();
   render();
+  requestPersistentStorage();
+  checkAndAutoSyncOnOpen();
 }
 
 function updateProfile(){
@@ -2035,7 +2239,7 @@ async function saveDocument(){
     render();
     showToast(state.editingId ? 'Document updated' : 'Document added');
     const cloudCfg = getCloudConfig();
-    if(cloudCfg.url && cloudCfg.key && cloudCfg.autosync !== false){
+    if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
       syncVaultToCloud(true);
     }
   } else {
@@ -2096,7 +2300,7 @@ async function deleteCurrentDoc(){
   render();
   showToast('Document deleted');
   const cloudCfg = getCloudConfig();
-  if(cloudCfg.url && cloudCfg.key && cloudCfg.autosync !== false){
+  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
     syncVaultToCloud(true);
   }
 }
@@ -2123,11 +2327,61 @@ function showToast(msg, isError){
 }
 
 // close overlays on backdrop click
-document.getElementById('doc-overlay').addEventListener('click', e=>{ if(e.target.id==='doc-overlay') closeDocModal(); });
-document.getElementById('detail-overlay').addEventListener('click', e=>{ if(e.target.id==='detail-overlay') closeDetailModal(); });
+const docOverlayEl = document.getElementById('doc-overlay');
+if(docOverlayEl) docOverlayEl.addEventListener('click', e=>{ if(e.target.id==='doc-overlay') closeDocModal(); });
+
+const detailOverlayEl = document.getElementById('detail-overlay');
+if(detailOverlayEl) detailOverlayEl.addEventListener('click', e=>{ if(e.target.id==='detail-overlay') closeDetailModal(); });
+
+const cloudOverlayEl = document.getElementById('cloud-overlay');
+if(cloudOverlayEl) cloudOverlayEl.addEventListener('click', e=>{ if(e.target.id==='cloud-overlay') closeCloudModal(); });
+
+const gateRecOverlayEl = document.getElementById('gate-recover-overlay');
+if(gateRecOverlayEl) gateRecOverlayEl.addEventListener('click', e=>{ if(e.target.id==='gate-recover-overlay') closeGateRecoverModal(); });
+
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){ closeDocModal(); closeDetailModal(); }
+  if(e.key==='Escape'){
+    closeDocModal();
+    closeDetailModal();
+    closeCloudModal();
+    closeGateRecoverModal();
+  }
 });
+
+// Explicit event listeners for Cloud & Backup buttons to ensure 100% responsiveness
+function attachCloudButtonListeners(){
+  const topBtn = document.getElementById('top-cloud-btn');
+  if(topBtn){
+    topBtn.removeEventListener('click', openCloudModal);
+    topBtn.addEventListener('click', openCloudModal);
+    topBtn.style.cursor = 'pointer';
+  }
+  const sideItem = document.getElementById('sidebar-cloud-item');
+  if(sideItem){
+    sideItem.removeEventListener('click', openCloudModal);
+    sideItem.addEventListener('click', openCloudModal);
+    sideItem.setAttribute('role', 'button');
+    sideItem.setAttribute('tabindex', '0');
+    sideItem.style.cursor = 'pointer';
+    sideItem.addEventListener('keydown', ev=>{
+      if(ev.key==='Enter' || ev.key===' '){
+        ev.preventDefault();
+        openCloudModal(ev);
+      }
+    });
+  }
+  const gateRecBtns = document.querySelectorAll('.recover-trigger-btn');
+  gateRecBtns.forEach(btn=>{
+    btn.removeEventListener('click', openGateRecoverModal);
+    btn.addEventListener('click', openGateRecoverModal);
+    btn.style.cursor = 'pointer';
+  });
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', attachCloudButtonListeners);
+} else {
+  attachCloudButtonListeners();
+}
 
 /* ================= PWA & PLATFORM BRIDGE (DESKTOP & MOBILE) ================= */
 let deferredPrompt = null;
@@ -2192,7 +2446,18 @@ const LS_CLOUD_CONFIG = 'keepsafe_cloud_config_v2';
 const LS_LAST_SYNC = 'keepsafe_last_sync_v2';
 
 function getCloudConfig(){
-  try{ return JSON.parse(localStorage.getItem(LS_CLOUD_CONFIG) || '{}'); } catch(e){ return {}; }
+  try{
+    const cfg = JSON.parse(localStorage.getItem(LS_CLOUD_CONFIG) || '{}');
+    if(!cfg.cfUrl && typeof window !== 'undefined' && window.location.origin && window.location.origin.includes('workers.dev')){
+      cfg.provider = 'cloudflare';
+      cfg.cfUrl = window.location.origin;
+      cfg.url = window.location.origin;
+      cfg.autosync = true;
+      cfg.syncOnOpen = true;
+      localStorage.setItem(LS_CLOUD_CONFIG, JSON.stringify(cfg));
+    }
+    return cfg;
+  } catch(e){ return {}; }
 }
 function saveCloudConfig(cfg){
   localStorage.setItem(LS_CLOUD_CONFIG, JSON.stringify(cfg));
@@ -2272,6 +2537,130 @@ async function decryptVaultPayload(encryptedObj, secret){
   return JSON.parse(jsonStr);
 }
 
+/* --- Cloud Storage Provider Helper --- */
+function isCloudConfigured(cfg = getCloudConfig()){
+  if(!cfg) return false;
+  const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
+  if(prov === 'cloudflare'){
+    return !!(cfg.cfUrl || cfg.url);
+  }
+  return !!(cfg.url && cfg.key);
+}
+
+/* --- Cloudflare Worker REST Client Methods --- */
+async function pushToCloudflare(cfg, userKeyStr, encryptedData){
+  const baseUrl = (cfg.cfUrl || cfg.url).replace(/\/+$/, '');
+  const endpoint = `${baseUrl}/api/vault`;
+  const headers = { 'Content-Type': 'application/json' };
+  const token = cfg.cfToken || cfg.key;
+  if(token) headers['X-Sync-Secret'] = token;
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify({
+      user_id: userKeyStr,
+      encrypted_data: encryptedData,
+      updated_at: new Date().toISOString()
+    })
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    let msg = errText;
+    try { const parsed = JSON.parse(errText); if(parsed.error) msg = parsed.error; }catch(e){}
+    throw new Error(`Cloudflare Worker Error (${res.status}): ${msg}`);
+  }
+  return true;
+}
+
+async function pullFromCloudflare(cfg, userKeyStr){
+  const baseUrl = (cfg.cfUrl || cfg.url).replace(/\/+$/, '');
+  const endpoint = `${baseUrl}/api/vault?user_id=${encodeURIComponent(userKeyStr)}`;
+  const headers = {};
+  const token = cfg.cfToken || cfg.key;
+  if(token) headers['X-Sync-Secret'] = token;
+
+  const res = await fetch(endpoint, {
+    method: 'GET',
+    headers: headers
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    let msg = errText;
+    try { const parsed = JSON.parse(errText); if(parsed.error) msg = parsed.error; }catch(e){}
+    throw new Error(`Cloudflare Worker Error (${res.status}): ${msg}`);
+  }
+  const data = await res.json();
+  if(!data || !data.found){
+    return null;
+  }
+  return data.encrypted_data;
+}
+
+async function testCloudflareConnection(){
+  const url = document.getElementById('cfg-cf-url').value.trim();
+  const token = document.getElementById('cfg-cf-token').value.trim();
+  const btn = document.getElementById('btn-test-cf');
+  if(!url){
+    showToast('Paki-lagay muna ang Cloudflare Worker URL', true);
+    return;
+  }
+  btn.classList.add('loading');
+  try{
+    const baseUrl = url.replace(/\/+$/, '');
+    const headers = {};
+    if(token) headers['X-Sync-Secret'] = token;
+    const res = await fetch(`${baseUrl}/health`, { headers });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    btn.classList.remove('loading');
+    alert(`✅ Matagumpay ang Koneksyon sa Cloudflare!\n\nStatus: ${data.status}\nStorage: ${data.storage_type || 'Active'}\nService: ${data.service}`);
+  }catch(e){
+    btn.classList.remove('loading');
+    alert(`❌ Nabigo ang koneksyon sa Cloudflare: ${e.message}\n\nSiguraduhing naka-deploy ang Cloudflare Worker at tama ang URL.`);
+  }
+}
+
+/* --- Storage Persistence Helper (Prevents Browser Auto-Eviction) --- */
+async function requestPersistentStorage(){
+  if(navigator.storage && navigator.storage.persist){
+    try{
+      const isPersisted = await navigator.storage.persist();
+      updatePersistenceUI(isPersisted);
+      return isPersisted;
+    }catch(e){
+      console.warn('Storage persist request:', e);
+    }
+  }
+  return false;
+}
+
+async function enableStoragePersistence(){
+  const granted = await requestPersistentStorage();
+  if(granted){
+    showToast('Storage persistence granted! Protektado na laban sa cache clearing.');
+  } else {
+    showToast('Storage persistence is already managed by your browser.');
+  }
+}
+
+async function updatePersistenceUI(isPersisted){
+  const textEl = document.getElementById('storage-persist-text');
+  const btn = document.getElementById('btn-request-persist');
+  if(navigator.storage && navigator.storage.persisted){
+    if(isPersisted === undefined) isPersisted = await navigator.storage.persisted();
+  }
+  if(textEl && btn){
+    if(isPersisted){
+      textEl.textContent = '✅ Ligtas: Naka-lock ang data laban sa automatic browser eviction.';
+      btn.style.display = 'none';
+    } else {
+      textEl.textContent = 'Pumipigil sa browser na kusang burahin ang iyong local cache';
+      btn.style.display = 'inline-flex';
+    }
+  }
+}
+
 /* --- Supabase REST Client Methods --- */
 async function pushToSupabase(cfg, userKeyStr, encryptedData){
   const baseUrl = cfg.url.replace(/\/+$/, '');
@@ -2322,25 +2711,179 @@ async function pullFromSupabase(cfg, userKeyStr){
 }
 
 /* --- UI Modal Handlers --- */
-function openCloudModal(){
-  const cfg = getCloudConfig();
-  document.getElementById('cfg-cloud-url').value = cfg.url || '';
-  document.getElementById('cfg-cloud-key').value = cfg.key || '';
-  document.getElementById('cfg-cloud-autosync').checked = cfg.autosync !== false;
-  updateCloudStatusUI();
-  document.getElementById('cloud-overlay').classList.add('show');
-}
-function closeCloudModal(){
-  document.getElementById('cloud-overlay').classList.remove('show');
+let currentCloudProvider = 'cloudflare';
+let currentRecProvider = 'cloudflare';
+
+function switchCloudProvider(prov){
+  currentCloudProvider = prov;
+  document.getElementById('prov-btn-cf').classList.toggle('active', prov === 'cloudflare');
+  document.getElementById('prov-btn-sb').classList.toggle('active', prov === 'supabase');
+  document.getElementById('provider-section-cf').style.display = prov === 'cloudflare' ? 'block' : 'none';
+  document.getElementById('provider-section-sb').style.display = prov === 'supabase' ? 'block' : 'none';
+  const cfGuide = document.getElementById('setup-guide-cf');
+  const sbGuide = document.getElementById('setup-guide-sb');
+  if(cfGuide) cfGuide.style.display = prov === 'cloudflare' ? 'block' : 'none';
+  if(sbGuide) sbGuide.style.display = prov === 'supabase' ? 'block' : 'none';
+  if(prov === 'cloudflare' && cfGuide) cfGuide.open = true;
 }
 
-function openGateRecoverModal(){
-  document.getElementById('rec-file-error').textContent = '';
-  document.getElementById('rec-cloud-error').textContent = '';
-  document.getElementById('gate-recover-overlay').classList.add('show');
+function switchRecProvider(prov){
+  currentRecProvider = prov;
+  document.getElementById('rec-prov-cf').classList.toggle('active', prov === 'cloudflare');
+  document.getElementById('rec-prov-sb').classList.toggle('active', prov === 'supabase');
+  document.getElementById('rec-fields-cf').style.display = prov === 'cloudflare' ? 'block' : 'none';
+  document.getElementById('rec-fields-sb').style.display = prov === 'supabase' ? 'block' : 'none';
 }
-function closeGateRecoverModal(){
-  document.getElementById('gate-recover-overlay').classList.remove('show');
+
+function copyWorkerCode(){
+  const workerScript = `// Keepsafe Vault - Cloudflare Worker Sync Engine
+const memoryCache = new Map();
+
+export default {
+  async fetch(request, env) {
+    const cors = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Sync-Secret',
+      'Access-Control-Max-Age': '86400',
+    };
+
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: cors });
+    }
+
+    const url = new URL(request.url);
+    const syncSecret = env.SYNC_SECRET;
+    if (syncSecret) {
+      const authHeader = request.headers.get('X-Sync-Secret') || request.headers.get('Authorization')?.replace('Bearer ', '');
+      if (authHeader !== syncSecret) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+    }
+
+    if (url.pathname === '/health') {
+      const hasKV = !!env.VAULT_KV;
+      return new Response(JSON.stringify({
+        status: 'ok',
+        service: 'Keepsafe Vault Cloudflare Sync',
+        kv_bound: hasKV,
+        storage_type: hasKV ? 'Cloudflare KV (Persistent)' : 'Memory Cache (Bind VAULT_KV in Settings)'
+      }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+    }
+
+    if (url.pathname === '/api/vault') {
+      if (request.method === 'GET') {
+        const uid = url.searchParams.get('user_id');
+        if (!uid) return new Response(JSON.stringify({ error: 'Missing user_id' }), { status: 400, headers: cors });
+        let data = null;
+        if (env.VAULT_KV) {
+          const raw = await env.VAULT_KV.get('vault:' + uid);
+          if (raw) data = JSON.parse(raw);
+        } else {
+          data = memoryCache.get(uid);
+        }
+        if (!data) return new Response(JSON.stringify({ found: false }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ found: true, encrypted_data: data.encrypted_data || data }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+
+      if (request.method === 'POST') {
+        const body = await request.json();
+        const { user_id, encrypted_data } = body;
+        if (!user_id || !encrypted_data) return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400, headers: cors });
+        const record = { user_id, encrypted_data, updated_at: new Date().toISOString() };
+        if (env.VAULT_KV) {
+          await env.VAULT_KV.put('vault:' + user_id, JSON.stringify(record));
+        } else {
+          memoryCache.set(user_id, record);
+        }
+        return new Response(JSON.stringify({ success: true, updated_at: record.updated_at }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+    }
+
+    return new Response('Keepsafe Vault Worker Online. Endpoint: /api/vault', { headers: cors });
+  }
+};`;
+
+  navigator.clipboard.writeText(workerScript).then(()=>{
+    showToast('Cloudflare Worker code copied to clipboard!');
+  }).catch(()=>{
+    showToast('Failed to copy code', true);
+  });
+}
+
+function openCloudModal(e){
+  if(e && e.preventDefault) e.preventDefault();
+  if(e && e.stopPropagation) e.stopPropagation();
+
+  // Instantly show overlay so button is 100% responsive
+  const overlay = document.getElementById('cloud-overlay');
+  if(overlay){
+    overlay.style.display = 'flex';
+    overlay.classList.add('show');
+  }
+
+  try{
+    const cfg = getCloudConfig() || {};
+    const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
+    if(typeof switchCloudProvider === 'function'){
+      switchCloudProvider(prov);
+    }
+
+    const cfUrlEl = document.getElementById('cfg-cf-url');
+    if(cfUrlEl) cfUrlEl.value = cfg.cfUrl || (prov === 'cloudflare' ? cfg.url : '') || '';
+
+    const cfTokEl = document.getElementById('cfg-cf-token');
+    if(cfTokEl) cfTokEl.value = cfg.cfToken || '';
+
+    const clUrlEl = document.getElementById('cfg-cloud-url');
+    if(clUrlEl) clUrlEl.value = cfg.url || '';
+
+    const clKeyEl = document.getElementById('cfg-cloud-key');
+    if(clKeyEl) clKeyEl.value = cfg.key || '';
+
+    const autoSyncEl = document.getElementById('cfg-cloud-autosync');
+    if(autoSyncEl) autoSyncEl.checked = cfg.autosync !== false;
+
+    const reopenSyncEl = document.getElementById('cfg-cloud-reopen-sync');
+    if(reopenSyncEl) reopenSyncEl.checked = cfg.syncOnOpen !== false;
+
+    if(typeof updateCloudStatusUI === 'function') updateCloudStatusUI();
+    if(typeof updatePersistenceUI === 'function') updatePersistenceUI();
+  }catch(err){
+    console.warn('Notice in openCloudModal:', err);
+  }
+}
+
+function closeCloudModal(e){
+  if(e && e.preventDefault) e.preventDefault();
+  const overlay = document.getElementById('cloud-overlay');
+  if(overlay){
+    overlay.style.display = 'none';
+    overlay.classList.remove('show');
+  }
+}
+
+function openGateRecoverModal(e){
+  if(e && e.preventDefault) e.preventDefault();
+  if(e && e.stopPropagation) e.stopPropagation();
+  const errF = document.getElementById('rec-file-error');
+  if(errF) errF.textContent = '';
+  const errC = document.getElementById('rec-cloud-error');
+  if(errC) errC.textContent = '';
+  const overlay = document.getElementById('gate-recover-overlay');
+  if(overlay){
+    overlay.style.display = 'flex';
+    overlay.classList.add('show');
+  }
+}
+
+function closeGateRecoverModal(e){
+  if(e && e.preventDefault) e.preventDefault();
+  const overlay = document.getElementById('gate-recover-overlay');
+  if(overlay){
+    overlay.style.display = 'none';
+    overlay.classList.remove('show');
+  }
 }
 
 function switchCloudTab(tab){
@@ -2370,7 +2913,8 @@ function copySqlCode(){
 
 function updateCloudStatusUI(){
   const cfg = getCloudConfig();
-  const hasCfg = !!(cfg.url && cfg.key);
+  const configured = isCloudConfigured(cfg);
+  const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
   const badge = document.getElementById('cloud-status-badge');
   const dot = document.getElementById('cloud-status-dot');
   const desc = document.getElementById('cloud-status-desc');
@@ -2381,14 +2925,16 @@ function updateCloudStatusUI(){
     lastSyncTimeEl.textContent = lastSync ? `Last sync: ${new Date(lastSync).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}` : 'Last sync: Never';
   }
 
-  if(!hasCfg){
+  if(!configured){
     if(badge){ badge.className = 'status-indicator-badge'; badge.textContent = '○ Disconnected'; }
     if(dot){ dot.className = 'cloud-status-dot disconnected'; }
-    if(desc){ desc.textContent = 'Ikonekta sa libreng Supabase database para automatic na naka-backup ang lahat ng files sa cloud.'; }
+    if(desc){ desc.textContent = 'Ikonekta sa Cloudflare Worker o Supabase para awtomatikong naka-save ang lahat ng iyong dokumento sa cloud.'; }
   } else {
-    if(badge){ badge.className = 'status-indicator-badge ok'; badge.textContent = '● Connected & Synced'; }
+    const provName = prov === 'cloudflare' ? 'Cloudflare Workers' : 'Supabase';
+    const host = prov === 'cloudflare' ? (cfg.cfUrl || cfg.url || '').replace(/^https?:\/\//, '').split('/')[0] : (cfg.url || '').replace(/^https?:\/\//, '').split('.')[0] + '.supabase.co';
+    if(badge){ badge.className = 'status-indicator-badge ok'; badge.textContent = `● Connected to ${provName}`; }
     if(dot){ dot.className = 'cloud-status-dot connected'; }
-    if(desc){ desc.textContent = `Naka-link sa ${cfg.url.replace(/^https?:\/\//, '').split('.')[0]}.supabase.co (Auto-sync: ${cfg.autosync !== false ? 'ON' : 'OFF'})`; }
+    if(desc){ desc.textContent = `Naka-link sa ${host} (Auto-sync: ${cfg.autosync !== false ? 'ON' : 'OFF'}, On Open: ${cfg.syncOnOpen !== false ? 'ON' : 'OFF'})`; }
   }
 }
 
@@ -2396,7 +2942,7 @@ function updateCloudStatusUI(){
 async function syncVaultToCloud(isSilent = false){
   if(!currentUser) return false;
   const cfg = getCloudConfig();
-  if(!cfg.url || !cfg.key) return false;
+  if(!isCloudConfigured(cfg)) return false;
 
   const dot = document.getElementById('cloud-status-dot');
   if(dot) dot.className = 'cloud-status-dot syncing';
@@ -2413,10 +2959,15 @@ async function syncVaultToCloud(isSilent = false){
 
   try{
     const encrypted = await encryptVaultPayload(payload, currentUser.passHash);
-    await pushToSupabase(cfg, userK, encrypted);
+    const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
+    if(prov === 'cloudflare'){
+      await pushToCloudflare(cfg, userK, encrypted);
+    } else {
+      await pushToSupabase(cfg, userK, encrypted);
+    }
     localStorage.setItem(LS_LAST_SYNC, new Date().toISOString());
     updateCloudStatusUI();
-    if(!isSilent) showToast('Cloud sync complete! Naka-save na sa cloud ang iyong files.');
+    if(!isSilent) showToast('Cloud sync complete! Ligtas na naka-save sa Cloudflare.');
     return true;
   }catch(err){
     console.error('Cloud Sync failed:', err);
@@ -2427,18 +2978,36 @@ async function syncVaultToCloud(isSilent = false){
 }
 
 async function saveCloudSettingsAndSync(){
-  const url = document.getElementById('cfg-cloud-url').value.trim();
-  const key = document.getElementById('cfg-cloud-key').value.trim();
-  const autosync = document.getElementById('cfg-cloud-autosync').checked;
-  const btn = document.getElementById('btn-save-cloud-cfg');
+  const prov = currentCloudProvider;
+  let newCfg = { provider: prov };
 
-  if(!url || !key){
-    showToast('Paki-lagay ang Supabase URL at Public Anon Key', true);
-    return;
+  if(prov === 'cloudflare'){
+    const cfUrl = document.getElementById('cfg-cf-url').value.trim();
+    const cfToken = document.getElementById('cfg-cf-token').value.trim();
+    if(!cfUrl){
+      showToast('Paki-lagay ang Cloudflare Worker URL', true);
+      return;
+    }
+    newCfg.cfUrl = cfUrl;
+    newCfg.url = cfUrl;
+    newCfg.cfToken = cfToken;
+  } else {
+    const url = document.getElementById('cfg-cloud-url').value.trim();
+    const key = document.getElementById('cfg-cloud-key').value.trim();
+    if(!url || !key){
+      showToast('Paki-lagay ang Supabase URL at Public Anon Key', true);
+      return;
+    }
+    newCfg.url = url;
+    newCfg.key = key;
   }
 
+  newCfg.autosync = document.getElementById('cfg-cloud-autosync').checked;
+  newCfg.syncOnOpen = document.getElementById('cfg-cloud-reopen-sync').checked;
+
+  const btn = document.getElementById('btn-save-cloud-cfg');
   btn.classList.add('loading');
-  saveCloudConfig({ url, key, autosync });
+  saveCloudConfig(newCfg);
 
   const ok = await syncVaultToCloud(false);
   btn.classList.remove('loading');
@@ -2459,8 +3028,8 @@ function disconnectCloud(){
 async function pullFromCloudManual(){
   if(!currentUser) return;
   const cfg = getCloudConfig();
-  if(!cfg.url || !cfg.key){
-    showToast('I-save muna ang Supabase URL at Key', true);
+  if(!isCloudConfigured(cfg)){
+    showToast('I-save muna ang Cloudflare Worker o Supabase URL', true);
     return;
   }
   const btn = document.getElementById('btn-pull-cloud');
@@ -2468,7 +3037,14 @@ async function pullFromCloudManual(){
 
   const userK = currentUser._key || userKey(currentUser.name);
   try{
-    const encrypted = await pullFromSupabase(cfg, userK);
+    const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
+    let encrypted = null;
+    if(prov === 'cloudflare'){
+      encrypted = await pullFromCloudflare(cfg, userK);
+    } else {
+      encrypted = await pullFromSupabase(cfg, userK);
+    }
+
     if(!encrypted){
       alert('Walang nakitang naka-sync na vault sa cloud para sa account na ito.');
       btn.classList.remove('loading');
@@ -2622,16 +3198,33 @@ async function executeFileRecovery(){
 }
 
 async function executeCloudRecovery(){
-  const url = document.getElementById('rec-cloud-url').value.trim();
-  const key = document.getElementById('rec-cloud-key').value.trim();
+  const prov = currentRecProvider;
   const userName = document.getElementById('rec-cloud-user').value.trim();
   const pass = document.getElementById('rec-cloud-pass').value;
   const errEl = document.getElementById('rec-cloud-error');
   const btn = document.getElementById('rec-cloud-btn');
 
-  if(!url || !key || !userName || !pass){
-    errEl.textContent = 'Paki-kumpleto ang lahat ng field.';
-    return;
+  let cfg = { provider: prov, autosync: true, syncOnOpen: true };
+
+  if(prov === 'cloudflare'){
+    const cfUrl = document.getElementById('rec-cf-url').value.trim();
+    const cfToken = document.getElementById('rec-cf-token').value.trim();
+    if(!cfUrl || !userName || !pass){
+      errEl.textContent = 'Paki-kumpleto ang Worker URL, Username, at Password.';
+      return;
+    }
+    cfg.cfUrl = cfUrl;
+    cfg.url = cfUrl;
+    cfg.cfToken = cfToken;
+  } else {
+    const url = document.getElementById('rec-cloud-url').value.trim();
+    const key = document.getElementById('rec-cloud-key').value.trim();
+    if(!url || !key || !userName || !pass){
+      errEl.textContent = 'Paki-kumpleto ang Supabase URL, Key, Username, at Password.';
+      return;
+    }
+    cfg.url = url;
+    cfg.key = key;
   }
 
   errEl.textContent = '';
@@ -2639,10 +3232,15 @@ async function executeCloudRecovery(){
 
   try{
     const userK = userKey(userName);
-    const cfg = { url, key, autosync: true };
-    const encrypted = await pullFromSupabase(cfg, userK);
+    let encrypted = null;
+    if(prov === 'cloudflare'){
+      encrypted = await pullFromCloudflare(cfg, userK);
+    } else {
+      encrypted = await pullFromSupabase(cfg, userK);
+    }
+
     if(!encrypted){
-      throw new Error('Walang nakitang naka-save na vault sa Supabase para sa user na ito.');
+      throw new Error(`Walang nakitang naka-save na vault sa ${prov === 'cloudflare' ? 'Cloudflare' : 'Supabase'} para sa user na ito.`);
     }
 
     const hash = await sha256(pass);
@@ -2655,15 +3253,12 @@ async function executeCloudRecovery(){
       createdAt: new Date().toISOString()
     };
 
-    // Save restored user
     const users = getUsers();
     users[userK] = restoredUser;
     saveUsers(users);
 
-    // Save config for future auto sync
     saveCloudConfig(cfg);
 
-    // Save restored docs to IndexedDB
     if(Array.isArray(decrypted.docs)){
       for(const doc of decrypted.docs){
         doc.userKey = userK;
@@ -2685,6 +3280,66 @@ async function executeCloudRecovery(){
     btn.classList.remove('loading');
   }
 }
+
+/* --- Auto-Sync on App Reopen / Backgrounding Protection --- */
+async function checkAndAutoSyncOnOpen(){
+  if(!currentUser) return;
+  const cfg = getCloudConfig();
+  if(!isCloudConfigured(cfg) || cfg.syncOnOpen === false) return;
+
+  const userK = currentUser._key || userKey(currentUser.name);
+  const dot = document.getElementById('cloud-status-dot');
+  if(dot) dot.className = 'cloud-status-dot syncing';
+
+  try{
+    const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
+    let encrypted = null;
+    if(prov === 'cloudflare'){
+      encrypted = await pullFromCloudflare(cfg, userK);
+    } else {
+      encrypted = await pullFromSupabase(cfg, userK);
+    }
+
+    if(encrypted){
+      const decrypted = await decryptVaultPayload(encrypted, currentUser.passHash);
+      const cloudTime = new Date(encrypted.updatedAt || 0).getTime();
+      const localTime = new Date(localStorage.getItem(LS_LAST_SYNC) || 0).getTime();
+      const localDocs = await dbGetAllDocs(userK) || [];
+
+      // If cloud is newer or local is empty (e.g. fresh browser / cleared cache)
+      if(cloudTime > localTime || (localDocs.length === 0 && Array.isArray(decrypted.docs) && decrypted.docs.length > 0)){
+        if(Array.isArray(decrypted.docs)){
+          for(const doc of decrypted.docs){
+            doc.userKey = userK;
+            await dbPutDoc(doc);
+          }
+          await loadDocs();
+          render();
+          showToast(`☁️ Na-sync mula sa Cloud (${decrypted.docs.length} mga dokumento)`);
+        }
+      }
+    } else {
+      const localDocs = await dbGetAllDocs(userK) || [];
+      if(localDocs.length > 0){
+        await syncVaultToCloud(true);
+      }
+    }
+  }catch(e){
+    console.warn('Auto-sync check notice:', e);
+  } finally {
+    updateCloudStatusUI();
+  }
+}
+
+// Ensure data is synced when tab becomes hidden or app is closed
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && currentUser) {
+    const cfg = getCloudConfig();
+    if (isCloudConfigured(cfg) && cfg.autosync !== false) {
+      syncVaultToCloud(true);
+    }
+  }
+});
 
 </script>
     <script>
