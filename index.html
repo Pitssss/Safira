@@ -1163,6 +1163,26 @@
 
 <!-- ============ DETAIL MODAL ============ -->
 <div class="overlay" id="detail-overlay">
+
+<!-- Fullscreen In-App File Preview Lightbox -->
+<div class="overlay" id="preview-lightbox" style="z-index: 2000;" onclick="if(event.target===this) closeFullscreenPreview();">
+  <div style="position:relative; width:94vw; max-width:1200px; height:88vh; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-l); display:flex; flex-direction:column; overflow:hidden; box-shadow:var(--shadow-lift);">
+    <div style="padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--surface-2);">
+      <div style="display:flex; align-items:center; gap:12px; overflow:hidden;">
+        <span id="lightbox-icon" style="display:inline-flex; align-items:center;"></span>
+        <h3 id="lightbox-title" style="margin:0; font-size:16px; font-family:'Fraunces', serif; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Document Preview</h3>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="btn btn-ghost" onclick="downloadCurrentDoc()" style="font-size:13px; padding:6px 14px;">⬇ I-download</button>
+        <button class="icon-btn" onclick="closeFullscreenPreview()" title="Isara (ESC)" style="font-size:16px; width:34px; height:34px;">✕</button>
+      </div>
+    </div>
+    <div id="lightbox-body" style="flex:1; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0B0D0E; overflow:hidden; padding:12px; position:relative;">
+      <!-- Dynamic preview injected here -->
+    </div>
+  </div>
+</div>
+
   <div class="modal">
     <div class="modal-head">
       <h2 id="detail-title">Document</h2>
@@ -2380,18 +2400,47 @@ function openDetail(id){
 
   const fileBox = document.getElementById('detail-file');
   const dlBtn = document.getElementById('detail-download');
+  const viewBtn = document.getElementById('detail-view');
   const fileUrl = doc.fileDataUrl || doc.dataUrl;
 
   if(fileUrl){
     if(dlBtn) dlBtn.style.display='inline-flex';
+    if(viewBtn) viewBtn.style.display='inline-flex';
+
     const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
+    const isPdf = (doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf') || (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf'));
+
     if(isImg){
-      fileBox.innerHTML = `<img src="${fileUrl}" style="max-width:100%;max-height:240px;border-radius:8px;object-fit:contain;cursor:pointer;" onclick="viewCurrentDoc()" title="Click to view full size">`;
+      fileBox.innerHTML = `
+        <div style="position:relative; width:100%; display:flex; flex-direction:column; align-items:center; padding:8px 0;">
+          <img src="${fileUrl}" alt="${escapeHtml(docName)}" style="max-width:100%; max-height:260px; object-fit:contain; border-radius:8px; cursor:zoom-in; box-shadow:0 4px 14px rgba(0,0,0,0.3);" onclick="openFullscreenPreview()" title="I-click para i-fullscreen">
+          <div style="margin-top:8px; display:flex; gap:8px;">
+            <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">🔍 Palakihin ang Litrato</button>
+          </div>
+        </div>`;
+    } else if(isPdf){
+      fileBox.innerHTML = `
+        <div style="width:100%; display:flex; flex-direction:column; padding:4px 0;">
+          <iframe src="${fileUrl}#toolbar=1" style="width:100%; height:320px; border:1px solid var(--border); border-radius:8px; background:#fff;"></iframe>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <span style="font-size:12px; color:var(--text-faint);">📄 PDF Document Preview</span>
+            <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">⛶ Fullscreen PDF</button>
+          </div>
+        </div>`;
     } else {
-      fileBox.innerHTML = `<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;cursor:pointer;" onclick="viewCurrentDoc()" title="Click to open">${ICONS.pdf}</div>`;
+      fileBox.innerHTML = `
+        <div style="width:100%; display:flex; align-items:center; gap:12px; padding:12px; background:var(--surface-3); border-radius:8px;">
+          <div class="fp-ic" style="width:48px;height:48px;border-radius:8px;">${ICONS.pdf}</div>
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:500; font-size:13px; color:var(--text); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${escapeHtml(doc.fileName || docName)}</div>
+            <div style="font-size:12px; color:var(--text-dim);">${escapeHtml(doc.fileType || 'Document File')}</div>
+          </div>
+          <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">Buksan</button>
+        </div>`;
     }
   } else {
     if(dlBtn) dlBtn.style.display='none';
+    if(viewBtn) viewBtn.style.display='none';
     fileBox.innerHTML = `<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;">${getCatIcon(doc.category)}</div>`;
   }
   document.getElementById('detail-overlay').classList.add('show');
@@ -2433,40 +2482,59 @@ function downloadCurrentDoc(){
   a.remove();
 }
 
-function viewCurrentDoc(){
+function openFullscreenPreview(){
   const doc = state.docs.find(d=>d.id===state.detailId);
   if(!doc) return;
   const fileUrl = doc.fileDataUrl || doc.dataUrl;
   if(!fileUrl) return;
-  const docTitle = escapeHtml(doc.name || doc.title || 'Document');
-  
-  // Try opening in new tab
-  try {
-    const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
-    const isPdf = (doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf');
-    const isText = (doc.fileType && doc.fileType.startsWith('text/')) || fileUrl.startsWith('data:text/');
 
-    const win = window.open();
-    if(win){
-      if(isImg){
-        win.document.write(`<!DOCTYPE html><html><head><title>${docTitle}</title></head><body style="margin:0;background:#0d0f10;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${fileUrl}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body></html>`);
-      } else if(isText){
-        let decodedText = '';
-        try {
-          const base64Part = fileUrl.split(',')[1];
-          decodedText = atob(base64Part);
-        } catch(e){ decodedText = fileUrl; }
-        win.document.write(`<!DOCTYPE html><html><head><title>${docTitle}</title></head><body style="margin:20px;background:#0d0f10;color:#ece8df;font-family:sans-serif;white-space:pre-wrap;">${escapeHtml(decodedText)}</body></html>`);
-      } else {
-        win.location.href = fileUrl;
-      }
-      return;
+  const docName = escapeHtml(doc.name || doc.title || 'Document');
+  document.getElementById('lightbox-title').textContent = doc.name || doc.title || 'Document Preview';
+  
+  const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
+  const isPdf = (doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf') || (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf'));
+  const isText = (doc.fileType && doc.fileType.startsWith('text/')) || fileUrl.startsWith('data:text/');
+
+  const bodyEl = document.getElementById('lightbox-body');
+  const iconEl = document.getElementById('lightbox-icon');
+
+  if(isImg){
+    iconEl.innerHTML = ICONS.img || '🖼️';
+    bodyEl.innerHTML = `<img src="${fileUrl}" alt="${docName}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.6);">`;
+  } else if(isPdf){
+    iconEl.innerHTML = ICONS.pdf || '📄';
+    bodyEl.innerHTML = `<iframe src="${fileUrl}#view=FitH" style="width:100%; height:100%; border:none; border-radius:8px; background:#ffffff;"></iframe>`;
+  } else if(isText){
+    iconEl.innerHTML = '📝';
+    let textContent = '';
+    try {
+      const base64Part = fileUrl.split(',')[1];
+      textContent = decodeURIComponent(escape(atob(base64Part)));
+    } catch(e){
+      try { textContent = atob(fileUrl.split(',')[1]); } catch(e2){ textContent = fileUrl; }
     }
-  } catch(e){
-    console.log('Window open note:', e);
+    bodyEl.innerHTML = `<pre style="width:100%; height:100%; margin:0; padding:24px; background:var(--surface-2); color:var(--text); border-radius:8px; overflow:auto; font-family:monospace; font-size:14px; line-height:1.6; white-space:pre-wrap;">${escapeHtml(textContent)}</pre>`;
+  } else {
+    iconEl.innerHTML = ICONS.pdf || '📁';
+    bodyEl.innerHTML = `<div style="text-align:center; color:var(--text);"><p style="font-size:16px; margin-bottom:12px;">Walang direktang preview para sa format na ito.</p><button class="btn btn-primary" onclick="downloadCurrentDoc()">I-download ang File</button></div>`;
   }
-  downloadCurrentDoc();
+
+  document.getElementById('preview-lightbox').classList.add('show');
 }
+
+function closeFullscreenPreview(){
+  const lb = document.getElementById('preview-lightbox');
+  if(lb){
+    lb.classList.remove('show');
+    const bodyEl = document.getElementById('lightbox-body');
+    if(bodyEl) bodyEl.innerHTML = '';
+  }
+}
+
+function viewCurrentDoc(){
+  openFullscreenPreview();
+}
+
 
 // Explicit event listeners for Cloud & Backup buttons to ensure 100% responsiveness
 function attachCloudButtonListeners(){
