@@ -1921,22 +1921,35 @@ async function handleSignup(){
   const err = document.getElementById('signup-error');
   const btn = document.getElementById('signup-btn');
 
-  if(!name){ err.textContent = 'Please enter your name.'; return; }
-  if(name.length < 2){ err.textContent = 'Name must be at least 2 characters.'; return; }
-  if(p1.length < 4){ err.textContent = 'Password must be at least 4 characters.'; return; }
-  if(p1 !== p2){ err.textContent = "Passwords don't match."; return; }
+  if(!name){ err.textContent = 'Paki-lagay ang iyong pangalan.'; return; }
+  if(name.length < 2){ err.textContent = 'Ang pangalan ay dapat hindi bababa sa 2 letra.'; return; }
+  if(p1.length < 4){ err.textContent = 'Ang password ay dapat hindi bababa sa 4 characters.'; return; }
+  if(p1 !== p2){ err.textContent = "Hindi magkatugma ang mga password."; return; }
 
   const key = userKey(name);
   const users = getUsers();
   if(users[key]){
-    err.textContent = 'An account with this name already exists. Try logging in.';
+    err.textContent = 'May account na sa pangalang ito. Mag-log in na lamang.';
     return;
   }
 
   err.textContent = '';
   btn.classList.add('loading');
 
-  await new Promise(r=>setTimeout(r, 600));
+  // Suriin kung mayroon nang ganitong account sa cloud
+  try{
+    const cfg = getCloudConfig();
+    const existingCloud = await pullFromCloudflare(cfg, key);
+    if(existingCloud){
+      err.textContent = 'May account na sa Cloud gamit ang pangalang ito! Pumunta sa Log in.';
+      btn.classList.remove('loading');
+      return;
+    }
+  }catch(e){
+    console.log('Pre-signup cloud check note:', e);
+  }
+
+  await new Promise(r=>setTimeout(r, 400));
 
   const hash = await sha256(p1);
   const docsKey = 'keepsafe_docs_' + key;
@@ -1945,7 +1958,7 @@ async function handleSignup(){
   try{
     saveUsers(users);
   }catch(e){
-    err.textContent = 'Could not save to this browser. Check storage permissions.';
+    err.textContent = 'Hindi mai-save sa browser. Tingnan ang storage permissions.';
     btn.classList.remove('loading');
     return;
   }
@@ -1959,7 +1972,9 @@ async function handleSignup(){
 
   await new Promise(r=>setTimeout(r, 400));
   await enterApp();
-  showToast('Welcome to Keepsafe, ' + name + '!');
+  showToast('Maligayang pagdating sa Keepsafe, ' + name + '!');
+
+  // Awtomatikong i-sync ang bagong account sa Cloudflare
   try{
     await syncVaultToCloud(true);
   }catch(e){
@@ -1974,74 +1989,86 @@ async function handleLogin(){
   const btn = document.getElementById('login-btn');
   const remember = document.getElementById('remember-me').checked;
 
-  if(!name){ err.textContent = 'Please enter your name.'; return; }
-  if(!pass){ err.textContent = 'Please enter your password.'; return; }
+  if(!name){ err.textContent = 'Paki-lagay ang iyong pangalan.'; return; }
+  if(!pass){ err.textContent = 'Paki-lagay ang iyong password.'; return; }
 
   const key = userKey(name);
-  const users = getUsers();
+  let users = getUsers();
 
+  // KUNG WALA ANG ACCOUNT SA LOCAL BROWSER -> KUNIN SA CLOUDFLARE
   if(!users[key]){
-    // Auto-check Cloudflare Sync if on workers.dev or cloud is configured
-    const cloudCfg = getCloudConfig();
-    const cfUrl = cloudCfg.cfUrl || (typeof window !== 'undefined' && window.location.origin && window.location.origin.includes('workers.dev') ? window.location.origin : '');
-    if(cfUrl){
-      btn.classList.add('loading');
-      err.textContent = 'Checking cloud vault for this account...';
-      try{
-        const testCfg = { provider: 'cloudflare', cfUrl: cfUrl, url: cfUrl, autosync: true, syncOnOpen: true };
-        const resData = await pullFromCloudflare(testCfg, key);
-        if(resData){
-          const rawEncrypted = resData.encrypted_data || resData;
-          const hash = await sha256(pass);
-          const decrypted = await decryptVaultPayload(rawEncrypted, hash);
-          const restoredUser = decrypted.user || {
-            name: name,
-            passHash: hash,
-            docsKey: 'keepsafe_docs_' + key,
-            createdAt: new Date().toISOString()
-          };
-          const curUsers = getUsers();
-          curUsers[key] = restoredUser;
-          saveUsers(curUsers);
-          saveCloudConfig(testCfg);
-
-          if(Array.isArray(decrypted.docs)){
-            for(const doc of decrypted.docs){
-              doc.userKey = key;
-              await dbPutDoc(doc);
-            }
-          }
-
-          currentUser = restoredUser;
-          currentUser._key = key;
-          sessionStorage.setItem(LS_SESSION, key);
-          if(remember) localStorage.setItem(LS_REMEMBER, key);
-
-          btn.classList.remove('loading');
-          err.textContent = '';
-          await enterApp();
-          showToast(\`Welcome back, \${name}! Vault synced from Cloudflare.\`);
-          return;
-        }
-      }catch(cloudErr){
-        console.warn('Cloud auto-login fallback notice:', cloudErr);
-      }finally{
+    btn.classList.add('loading');
+    err.textContent = 'Kinukumpirma ang account sa Cloud...';
+    try{
+      const cloudCfg = getCloudConfig();
+      const resData = await pullFromCloudflare(cloudCfg, key);
+      
+      if(!resData){
+        err.textContent = 'Walang account na nahanap sa pangalang ito (local o cloud).';
         btn.classList.remove('loading');
+        return;
       }
-    }
 
-    err.textContent = 'No account found on this device. Click "I-restore mula sa Cloud" below to restore your account.';
-    return;
+      // Nahanap sa Cloud! I-decrypt gamit ang password
+      const rawEncrypted = resData.encrypted_data || resData;
+      const hash = await sha256(pass);
+      let decrypted;
+      try{
+        decrypted = await decryptVaultPayload(rawEncrypted, hash);
+      }catch(decErr){
+        console.warn('Password decryption failed:', decErr);
+        err.textContent = 'Maling password para sa account na ito.';
+        btn.classList.remove('loading');
+        return;
+      }
+
+      // Tagumpay ang pag-decrypt! I-save ang account at docs sa browser
+      const restoredUser = decrypted.user || {
+        name: name,
+        passHash: hash,
+        docsKey: 'keepsafe_docs_' + key,
+        createdAt: new Date().toISOString()
+      };
+      restoredUser.passHash = hash;
+      restoredUser._key = key;
+
+      users = getUsers();
+      users[key] = restoredUser;
+      saveUsers(users);
+
+      if(Array.isArray(decrypted.docs)){
+        for(const doc of decrypted.docs){
+          doc.userKey = key;
+          await dbPutDoc(doc);
+        }
+      }
+
+      currentUser = restoredUser;
+      sessionStorage.setItem(LS_SESSION, key);
+      if(remember) localStorage.setItem(LS_REMEMBER, key);
+
+      btn.classList.remove('loading');
+      err.textContent = '';
+      await enterApp();
+      showToast(\`Maligayang pagbabalik, \${name}! Naka-sync na ang vault mula sa Cloud.\`);
+      return;
+    }catch(cloudErr){
+      console.error('Cloud auto-login error:', cloudErr);
+      err.textContent = 'Hindi makakonekta sa Cloud: ' + (cloudErr.message || cloudErr);
+      btn.classList.remove('loading');
+      return;
+    }
   }
 
+  // KUNG NASA LOCAL STORAGE NA ANG ACCOUNT
   err.textContent = '';
   btn.classList.add('loading');
 
-  await new Promise(r=>setTimeout(r, 500));
+  await new Promise(r=>setTimeout(r, 400));
 
   const hash = await sha256(pass);
   if(hash !== users[key].passHash){
-    err.textContent = 'Incorrect password.';
+    err.textContent = 'Maling password.';
     btn.classList.remove('loading');
     return;
   }
@@ -2061,7 +2088,27 @@ async function handleLogin(){
 
   await new Promise(r=>setTimeout(r, 400));
   await enterApp();
-  showToast('Welcome back, ' + currentUser.name + '!');
+  showToast('Maligayang pagbabalik, ' + currentUser.name + '!');
+
+  // Tahimik na i-check sa cloud kung may bagong docs mula sa ibang browser/device
+  try{
+    const cfg = getCloudConfig();
+    const cloudData = await pullFromCloudflare(cfg, key);
+    if(cloudData){
+      const rawEnc = cloudData.encrypted_data || cloudData;
+      const dec = await decryptVaultPayload(rawEnc, hash);
+      if(Array.isArray(dec.docs) && dec.docs.length > 0){
+        for(const doc of dec.docs){
+          doc.userKey = key;
+          await dbPutDoc(doc);
+        }
+        await loadDocs();
+        renderAll();
+      }
+    }
+  }catch(e){
+    console.log('Background cloud refresh note:', e);
+  }
 }
 
 async function handleReset(){
@@ -2625,12 +2672,14 @@ checkPlatform();
 const LS_CLOUD_CONFIG = 'keepsafe_cloud_config_v2';
 const LS_LAST_SYNC = 'keepsafe_last_sync_v2';
 
+const DEFAULT_CF_WORKER = 'https://safira.gbrielsales11.workers.dev';
+
 function getCloudConfig(){
   try{
     let cfg = JSON.parse(localStorage.getItem(LS_CLOUD_CONFIG) || '{}');
-    const defaultUrl = (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http')) 
-      ? window.location.origin 
-      : 'https://safira.gbrielsales11.workers.dev';
+    const defaultUrl = (typeof window !== 'undefined' && window.location.origin && window.location.origin.startsWith('http') && window.location.origin.includes('workers.dev'))
+      ? window.location.origin
+      : (DEFAULT_CF_WORKER || 'https://safira.gbrielsales11.workers.dev');
 
     if(!cfg.cfUrl || !cfg.url){
       cfg.provider = 'cloudflare';
@@ -2641,7 +2690,7 @@ function getCloudConfig(){
       try{ localStorage.setItem(LS_CLOUD_CONFIG, JSON.stringify(cfg)); }catch(e){}
     }
     return cfg;
-  } catch(e){ 
+  } catch(e){
     return { provider: 'cloudflare', cfUrl: 'https://safira.gbrielsales11.workers.dev', url: 'https://safira.gbrielsales11.workers.dev', autosync: true, syncOnOpen: true };
   }
 }
@@ -2725,12 +2774,7 @@ async function decryptVaultPayload(encryptedObj, secret){
 
 /* --- Cloud Storage Provider Helper --- */
 function isCloudConfigured(cfg = getCloudConfig()){
-  if(!cfg) return false;
-  const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
-  if(prov === 'cloudflare'){
-    return !!(cfg.cfUrl || cfg.url);
-  }
-  return !!(cfg.url && cfg.key);
+  return true; // Always active for Safira
 }
 
 /* --- Cloudflare Worker REST Client Methods --- */
@@ -2760,10 +2804,11 @@ async function pushToCloudflare(cfg, userKeyStr, encryptedData){
 }
 
 async function pullFromCloudflare(cfg, userKeyStr){
-  const baseUrl = (cfg.cfUrl || cfg.url).replace(/\\/+$/, '');
+  const fallbackUrl = 'https://safira.gbrielsales11.workers.dev';
+  const baseUrl = ((cfg && (cfg.cfUrl || cfg.url)) || fallbackUrl).replace(/\\/+$/, '');
   const endpoint = \`\${baseUrl}/api/vault?user_id=\${encodeURIComponent(userKeyStr)}\`;
   const headers = {};
-  const token = cfg.cfToken || cfg.key;
+  const token = (cfg && (cfg.cfToken || cfg.key)) || '';
   if(token) headers['X-Sync-Secret'] = token;
 
   const res = await fetch(endpoint, {
@@ -2771,6 +2816,7 @@ async function pullFromCloudflare(cfg, userKeyStr){
     headers: headers
   });
   if(!res.ok){
+    if(res.status === 404) return null;
     const errText = await res.text();
     let msg = errText;
     try { const parsed = JSON.parse(errText); if(parsed.error) msg = parsed.error; }catch(e){}
