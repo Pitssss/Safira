@@ -4,5 +4,11 @@
   "compatibility_date": "2024-09-23",
   "assets": {
     "directory": "."
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "VAULT_KV",
+      "id": "bc64995af3d84b238a6306356e67dde1"
+    }
+  ]
 }
