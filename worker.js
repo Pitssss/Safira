@@ -1688,6 +1688,12 @@ const CATEGORIES = [
   {id:'other', label:"Other", icon:ICONS.other},
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
+function getCatLabel(catId){
+  return (CAT_MAP[catId] && CAT_MAP[catId].label) || catId || 'General';
+}
+function getCatIcon(catId){
+  return (CAT_MAP[catId] && CAT_MAP[catId].icon) || ICONS.folder || '';
+}
 
 const LS_USERS = 'keepsafe_users_v2';
 const LS_THEME = 'keepsafe_theme_v1';
@@ -2261,7 +2267,7 @@ function render(){
     const st = computeStatus(d);
     if(state.status !== '__all__' && st !== state.status) return false;
     if(q){
-      const hay = (d.name+' '+CAT_MAP[d.category].label+' '+(d.notes||'')).toLowerCase();
+      const hay = (d.name+' '+getCatLabel(d.category)+' '+(d.notes||'')).toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -2295,7 +2301,7 @@ function render(){
   document.getElementById('count-all').textContent = state.docs.length;
 
   const filledCats = CATEGORIES.filter(c=>counts[c.id]>0).length;
-  document.getElementById('view-title').textContent = state.category==='__all__' ? 'All Documents' : CAT_MAP[state.category].label;
+  document.getElementById('view-title').textContent = state.category==='__all__' ? 'All Documents' : getCatLabel(state.category);
   document.getElementById('view-sub').textContent = state.category==='__all__'
     ? \`\${state.docs.length} file\${state.docs.length!==1?'s':''} · \${filledCats}/\${CATEGORIES.length} categories filled\`
     : \`\${counts[state.category]||0} file\${(counts[state.category]||0)!==1?'s':''}\`;
@@ -2326,7 +2332,7 @@ function fileIconFor(doc){
   return ICONS.pdf;
 }
 function extLabel(doc){
-  if(!doc.fileType) return CAT_MAP[doc.category].label;
+  if(!doc.fileType) return getCatLabel(doc.category);
   if(doc.fileType.startsWith('image/')) return doc.fileType.split('/')[1].toUpperCase();
   if(doc.fileType==='application/pdf') return 'PDF';
   return (doc.fileName||'').split('.').pop().toUpperCase() || 'FILE';
@@ -2344,10 +2350,10 @@ function cardHtml(d){
       <div class="file-ic">\${fileIconFor(d)}</div>
       \${statusBadge(st)}
     </div>
-    <div class="card-name">\${escapeHtml(d.name)}</div>
+    <div class="card-name">\${escapeHtml(d.name || d.title || "Untitled Document")}</div>
     <div class="card-meta">
       <span class="tag">\${extLabel(d)}</span>
-      <span class="tag cat">\${CAT_MAP[d.category].label}</span>
+      <span class="tag cat">\${getCatLabel(d.category)}</span>
     </div>
   </div>\`;
 }
@@ -2481,7 +2487,7 @@ function openDetail(id){
   state.detailId = id;
   const st = computeStatus(doc);
   document.getElementById('detail-title').textContent = doc.name;
-  document.getElementById('detail-category').textContent = CAT_MAP[doc.category].label;
+  document.getElementById('detail-category').textContent = getCatLabel(doc.category);
   document.getElementById('detail-status').innerHTML = statusBadge(st);
   document.getElementById('detail-expiry').textContent = doc.expiry ? formatDate(doc.expiry) : 'No expiry';
   document.getElementById('detail-added').textContent = formatDate(doc.addedAt.slice(0,10));
@@ -2503,7 +2509,7 @@ function openDetail(id){
     }
   } else {
     dlBtn.style.display='none';
-    fileBox.innerHTML = \`<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;">\${CAT_MAP[doc.category].icon}</div>\`;
+    fileBox.innerHTML = \`<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;">\${getCatIcon(doc.category)}</div>\`;
   }
   document.getElementById('detail-overlay').classList.add('show');
 }
