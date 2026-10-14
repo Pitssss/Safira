@@ -1128,7 +1128,7 @@ export default {
       <div class="recover-bar">
         <button type="button" class="recover-trigger-btn" onclick="openGateRecoverModal()">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 019.4-3.9L13.5 6M13.5 1.5v4.5H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M13.5 8a5.5 5.5 0 01-9.4 3.9L2.5 10M2.5 14.5v-4.5H7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-          I-restore mula sa Cloud o .vault Backup
+          Restore from Cloud or .vault Backup
         </button>
       </div>
     </div>
@@ -1299,8 +1299,8 @@ export default {
         <h3 id="lightbox-title" style="margin:0; font-size:16px; font-family:'Fraunces', serif; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Document Preview</h3>
       </div>
       <div style="display:flex; align-items:center; gap:10px;">
-        <button class="btn btn-ghost" onclick="downloadCurrentDoc()" style="font-size:13px; padding:6px 14px;">⬇ I-download</button>
-        <button class="icon-btn" onclick="closeFullscreenPreview()" title="Isara (ESC)" style="font-size:16px; width:34px; height:34px;">✕</button>
+        <button class="btn btn-ghost" onclick="downloadCurrentDoc()" style="font-size:13px; padding:6px 14px;">⬇ Download</button>
+        <button class="icon-btn" onclick="closeFullscreenPreview()" title="Close (ESC)" style="font-size:16px; width:34px; height:34px;">✕</button>
       </div>
     </div>
     <div id="lightbox-body" style="flex:1; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0B0D0E; overflow:hidden; padding:12px; position:relative;">
@@ -1326,7 +1326,7 @@ export default {
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-primary" id="detail-view" onclick="viewCurrentDoc()" style="margin-right:auto;">Buksan / View</button>
+      <button class="btn btn-primary" id="detail-view" onclick="viewCurrentDoc()" style="margin-right:auto;">Open / View</button>
       <button class="btn btn-ghost" id="detail-download" onclick="downloadCurrentDoc()">Download</button>
       <button class="btn btn-ghost" onclick="editCurrentDoc()">Edit</button>
       <button class="btn btn-danger-text" onclick="deleteCurrentDoc()">Delete</button>
@@ -1340,30 +1340,30 @@ export default {
   <div class="modal modal-wide">
     <div class="modal-head">
       <div>
-        <h2 style="font-size:18px;">Ibalik ang Vault Data (Recovery)</h2>
-        <div style="font-size:12px; color:var(--text-dim); margin-top:3px;">Mabawi ang mga files kung nabura ang browser cache o galing sa ibang device</div>
+        <h2 style="font-size:18px;">Restore Vault Data (Recovery)</h2>
+        <div style="font-size:12px; color:var(--text-dim); margin-top:3px;">Recover your files if browser cache was cleared or when moving to a new device</div>
       </div>
       <button class="icon-btn" onclick="closeGateRecoverModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="cloud-tabs">
-        <button class="cloud-tab active" id="tab-btn-rec-file" onclick="switchRecTab('file')">📦 Mula sa .vault File</button>
-        <button class="cloud-tab" id="tab-btn-rec-cloud" onclick="switchRecTab('cloud')">☁️ Mula sa Cloud (Cloudflare / Supabase)</button>
+        <button class="cloud-tab active" id="tab-btn-rec-file" onclick="switchRecTab('file')">📦 From .vault Backup File</button>
+        <button class="cloud-tab" id="tab-btn-rec-cloud" onclick="switchRecTab('cloud')">☁️ From Cloud (Cloudflare / Supabase)</button>
       </div>
 
       <!-- Recover via File -->
       <div id="rec-tab-file">
         <p style="font-size:13px; color:var(--text-dim); margin-bottom:14px; line-height:1.5;">
-          Piliin ang na-export mong <code>.vault</code> backup file at ilagay ang iyong vault password upang maibalik ang iyong mga files at account.
+          Select your exported <code>.vault</code> backup file and enter your password to restore your documents and account.
         </p>
         <div class="field">
-          <label>Piliin ang .vault Backup File</label>
+          <label>Select .vault Backup File</label>
           <input type="file" id="rec-file-input" accept=".vault,.json" class="file-input-stylish">
         </div>
         <div class="field">
           <label>Vault Password</label>
           <div class="pass-wrap">
-            <input type="password" id="rec-file-pass" placeholder="Ilagay ang iyong password">
+            <input type="password" id="rec-file-pass" placeholder="Enter your vault password">
             <button type="button" class="pass-toggle" onclick="togglePassVis(this)">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8C2.6 5.3 5.1 3.5 8 3.5C10.9 3.5 13.4 5.3 14.5 8C13.4 10.7 10.9 12.5 8 12.5C5.1 12.5 2.6 10.7 1.5 8Z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 13.5L13.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
             </button>
@@ -1372,14 +1372,14 @@ export default {
         <div id="rec-file-error" class="gate-error" style="margin-bottom:12px;"></div>
         <button class="btn btn-primary btn-block" id="rec-file-btn" onclick="executeFileRecovery()">
           <span class="btn-spinner"></span>
-          <span class="btn-text">I-restore ang Vault</span>
+          <span class="btn-text">Restore Vault</span>
         </button>
       </div>
 
       <!-- Recover via Cloud -->
       <div id="rec-tab-cloud" style="display:none;">
         <p style="font-size:13px; color:var(--text-dim); margin-bottom:12px; line-height:1.5;">
-          I-konekta sa iyong Cloudflare Worker o Supabase upang i-download at i-decrypt ang iyong naka-sync na vault data.
+          Connect to your Cloudflare Worker or Supabase to download and decrypt your synced vault data.
         </p>
 
         <div class="provider-switch-row" style="margin-bottom:14px;">
@@ -1398,7 +1398,7 @@ export default {
             <input type="text" id="rec-cf-url" placeholder="https://keepsafe-vault.yourname.workers.dev">
           </div>
           <div class="field">
-            <label>Sync Secret Token (Kung mayroon)</label>
+            <label>Sync Secret Token (Optional)</label>
             <input type="password" id="rec-cf-token" placeholder="Opsyonal: secret key">
           </div>
         </div>
@@ -1417,12 +1417,12 @@ export default {
 
         <div class="field">
           <label>Username / Account Name</label>
-          <input type="text" id="rec-cloud-user" placeholder="Pangalan na ginamit sa vault">
+          <input type="text" id="rec-cloud-user" placeholder="Username used in vault">
         </div>
         <div class="field">
           <label>Vault Password</label>
           <div class="pass-wrap">
-            <input type="password" id="rec-cloud-pass" placeholder="Password ng iyong vault">
+            <input type="password" id="rec-cloud-pass" placeholder="Your vault password">
             <button type="button" class="pass-toggle" onclick="togglePassVis(this)">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1.5 8C2.6 5.3 5.1 3.5 8 3.5C10.9 3.5 13.4 5.3 14.5 8C13.4 10.7 10.9 12.5 8 12.5C5.1 12.5 2.6 10.7 1.5 8Z" stroke="currentColor" stroke-width="1.2"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M2.5 13.5L13.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
             </button>
@@ -1431,7 +1431,7 @@ export default {
         <div id="rec-cloud-error" class="gate-error" style="margin-bottom:12px;"></div>
         <button class="btn btn-primary btn-block" id="rec-cloud-btn" onclick="executeCloudRecovery()">
           <span class="btn-spinner"></span>
-          <span class="btn-text">I-download at I-restore mula sa Cloud</span>
+          <span class="btn-text">Download and Restore from Cloud</span>
         </button>
       </div>
     </div>
@@ -1444,7 +1444,7 @@ export default {
     <div class="modal-head">
       <div>
         <h2>Cloud Sync & Backup Vault</h2>
-        <div style="font-size:12px; color:var(--text-dim); margin-top:3px;">Permanenteng proteksyon at awtomatikong sync kahit isara ang app</div>
+        <div style="font-size:12px; color:var(--text-dim); margin-top:3px;">Permanent cloud protection and automatic sync even across devices</div>
       </div>
       <button class="icon-btn" onclick="closeCloudModal()">✕</button>
     </div>
@@ -1462,17 +1462,17 @@ export default {
             <span class="status-time" id="cloud-last-sync-time">Last sync: Never</span>
           </div>
           <div class="cloud-status-desc" id="cloud-status-desc">
-            Ikonekta sa Cloudflare Worker o Supabase para awtomatikong naka-save ang lahat ng iyong dokumento sa cloud.
+            Connect to Cloudflare Worker or Supabase to automatically keep your documents backed up in the cloud.
           </div>
         </div>
 
         <div class="storage-persist-card">
           <div>
-            <strong style="color:var(--text); display:block; margin-bottom:2px;">🛡️ Proteksyon ng Browser Storage</strong>
-            <span id="storage-persist-text" style="color:var(--text-dim); font-size:12px;">Pumipigil sa browser na kusang burahin ang iyong local cache</span>
+            <strong style="color:var(--text); display:block; margin-bottom:2px;">🛡️ Browser Storage Persistence</strong>
+            <span id="storage-persist-text" style="color:var(--text-dim); font-size:12px;">Prevents the browser from automatically evicting your local cache</span>
           </div>
           <button type="button" class="btn btn-ghost" id="btn-request-persist" onclick="enableStoragePersistence()" style="font-size:12px; padding:5px 10px;">
-            I-lock ang Storage
+            Enable Persistence
           </button>
         </div>
 
@@ -1480,12 +1480,12 @@ export default {
           <div class="e2ee-ic">🔒</div>
           <div>
             <strong>End-to-End Encrypted (AES-GCM 256-bit)</strong>
-            <p>Lahat ng files ay ini-encrypt ng iyong sariling password bago umalis ng browser. Kahit ang Cloudflare ay hindi mababasa ang laman nito.</p>
+            <p>All files are encrypted client-side using your password before leaving your browser. Even Cloudflare cannot read your data.</p>
           </div>
         </div>
 
         <!-- Provider Switcher -->
-        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:6px;">PILIIN ANG CLOUD PROVIDER</label>
+        <label style="display:block; font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:6px;">SELECT CLOUD PROVIDER</label>
         <div class="provider-switch-row">
           <button type="button" class="provider-pill active" id="prov-btn-cf" onclick="switchCloudProvider('cloudflare')">
             <span>☁️ Cloudflare Workers KV</span>
@@ -1502,11 +1502,11 @@ export default {
               <label>Cloudflare Worker URL</label>
               <button type="button" class="btn-test-connection" id="btn-test-cf" onclick="testCloudflareConnection()">
                 <span class="btn-spinner"></span>
-                <span>Subukan ang Koneksyon</span>
+                <span>Test Connection</span>
               </button>
             </div>
             <input type="text" id="cfg-cf-url" placeholder="https://keepsafe-vault.yourname.workers.dev">
-            <div class="field-hint">Ang iyong libreng Cloudflare Worker endpoint na tumatanggap ng encrypted vault data.</div>
+            <div class="field-hint">Your free Cloudflare Worker endpoint that receives encrypted vault data.</div>
           </div>
 
           <div class="field">
@@ -1531,25 +1531,25 @@ export default {
         <div class="remember-row" style="margin-bottom:10px;">
           <label class="remember-check">
             <input type="checkbox" id="cfg-cloud-autosync" checked>
-            Auto-sync kapag nagdagdag, nagbago, o nagbura ng file
+            Auto-sync when adding, editing, or deleting files
           </label>
         </div>
 
         <div class="remember-row" style="margin-bottom:18px;">
           <label class="remember-check">
             <input type="checkbox" id="cfg-cloud-reopen-sync" checked>
-            Auto-sync sa pagbukas ng app (I-download ang pinakabagong bersyon)
+            Auto-sync on app open (Download latest version)
           </label>
         </div>
 
         <div class="btn-group-row">
           <button class="btn btn-primary" id="btn-save-cloud-cfg" onclick="saveCloudSettingsAndSync()">
             <span class="btn-spinner"></span>
-            <span class="btn-text">I-save & I-sync Ngayon</span>
+            <span class="btn-text">Save & Sync Now</span>
           </button>
           <button class="btn btn-ghost" id="btn-pull-cloud" onclick="pullFromCloudManual()">
             <span class="btn-spinner"></span>
-            <span class="btn-text">I-restore mula sa Cloud</span>
+            <span class="btn-text">Restore from Cloud</span>
           </button>
           <button class="btn btn-danger-text" id="btn-disconnect-cloud" onclick="disconnectCloud()" style="margin-left:auto;">
             Disconnect
@@ -1558,19 +1558,19 @@ export default {
 
         <!-- Cloudflare Setup Guide Collapsible -->
         <details class="setup-details" id="setup-guide-cf" style="margin-top:20px;" open>
-          <summary>☁️ Paano i-setup ang Cloudflare Worker (Libre, 2 minuto lang)</summary>
+          <summary>☁️ How to setup Cloudflare Worker (Free, 2 minutes)</summary>
           <div class="setup-guide-content">
             <ol>
-              <li>Pumunta sa <a href="https://dash.cloudflare.com" target="_blank" rel="noopener" style="color:var(--brass-bright); text-decoration:underline;">dash.cloudflare.com</a> at mag-login / mag-sign up nang libre.</li>
-              <li>Pindutin ang <strong>Workers & Pages</strong> &gt; <strong>Create application</strong> &gt; <strong>Create Worker</strong>.</li>
-              <li>Pangalanan ito (hal. <code>keepsafe-vault</code>) at i-click ang <strong>Deploy</strong>.</li>
-              <li>Pindutin ang <strong>Edit code</strong>, burahin ang default code, at i-paste ang Cloudflare Worker code sa ibaba:</li>
+              <li>Go to <a href="https://dash.cloudflare.com" target="_blank" rel="noopener" style="color:var(--brass-bright); text-decoration:underline;">dash.cloudflare.com</a> and sign in / sign up for free.</li>
+              <li>Click <strong>Workers & Pages</strong> &gt; <strong>Create application</strong> &gt; <strong>Create Worker</strong>.</li>
+              <li>Name it (e.g. <code>keepsafe-vault</code>) and click <strong>Deploy</strong>.</li>
+              <li>Click <strong>Edit code</strong>, clear default code, and paste the Cloudflare Worker code below:</li>
             </ol>
             <div class="sql-box-wrap" style="margin-bottom:12px;">
               <button class="btn-copy-sql" onclick="copyWorkerCode()" style="position:relative; right:auto; top:auto; width:100%; padding:10px; font-size:13px; margin-bottom:8px;">
-                📋 Kopyahin ang Kumpletong Cloudflare Worker Code
+                📋 Copy Complete Cloudflare Worker Code
               </button>
-              <pre id="cf-worker-code-preview" style="max-height:160px; overflow-y:auto; font-size:11px;">// Cloudflare Worker para sa Keepsafe Vault Sync
+              <pre id="cf-worker-code-preview" style="max-height:160px; overflow-y:auto; font-size:11px;">// Cloudflare Worker for Keepsafe Vault Sync
 export default {
   async fetch(request, env) {
     const cors = {
@@ -1601,22 +1601,22 @@ export default {
 };</pre>
             </div>
             <ol start="5">
-              <li>Pindutin ang <strong>Save and Deploy</strong> sa Cloudflare editor.</li>
-              <li><em>(Para sa permanenteng storage)</em>: Sa Worker page &gt; <strong>Settings</strong> &gt; <strong>Variables and KV</strong> &gt; Mag-bind ng KV namespace na pinangalanang <code>VAULT_KV</code>.</li>
-              <li>Kopyahin ang worker URL (hal. <code>https://keepsafe-vault.yourname.workers.dev</code>) at i-paste sa itaas!</li>
+              <li>Click <strong>Save and Deploy</strong> in the Cloudflare editor.</li>
+              <li><em>(For persistent storage)</em>: Under Worker &gt; <strong>Settings</strong> &gt; <strong>Bindings</strong> &gt; Bind a KV namespace named <code>VAULT_KV</code>.</li>
+              <li>Copy the worker URL (e.g. <code>https://keepsafe-vault.yourname.workers.dev</code>) and paste above!</li>
             </ol>
           </div>
         </details>
 
         <!-- Supabase Setup Guide Collapsible -->
         <details class="setup-details" id="setup-guide-sb" style="margin-top:14px; display:none;">
-          <summary>📖 Paano kumuha ng libreng Supabase URL & Key</summary>
+          <summary>📖 How to get a free Supabase URL & Key</summary>
           <div class="setup-guide-content">
             <ol>
-              <li>Pumunta sa <a href="https://supabase.com" target="_blank" rel="noopener" style="color:var(--brass-bright); text-decoration:underline;">supabase.com</a> at mag-sign up nang libre.</li>
-              <li>Pindutin ang <strong>"New Project"</strong> at pumili ng database password.</li>
-              <li>Pumunta sa <strong>Project Settings > API</strong> at kopyahin ang <code>Project URL</code> at <code>anon / public key</code>.</li>
-              <li>Pumunta sa <strong>SQL Editor</strong> sa Supabase at i-run ang sumusunod na code para sa vault table:</li>
+              <li>Go to <a href="https://supabase.com" target="_blank" rel="noopener" style="color:var(--brass-bright); text-decoration:underline;">supabase.com</a> and sign up for free.</li>
+              <li>Click <strong>"New Project"</strong> and set a database password.</li>
+              <li>Go to <strong>Project Settings > API</strong> and copy the <code>Project URL</code> and <code>anon / public key</code>.</li>
+              <li>Go to <strong>SQL Editor</strong> in Supabase and run this code to create the vault table:</li>
             </ol>
             <div class="sql-box-wrap">
               <pre id="supabase-sql-code">CREATE TABLE IF NOT EXISTS keepsafe_vault (
@@ -1626,7 +1626,7 @@ export default {
 );
 ALTER TABLE keepsafe_vault ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow anon access" ON keepsafe_vault FOR ALL USING (true) WITH CHECK (true);</pre>
-              <button class="btn-copy-sql" onclick="copySqlCode()">Kopyahin ang SQL</button>
+              <button class="btn-copy-sql" onclick="copySqlCode()">Copy SQL</button>
             </div>
           </div>
         </details>
@@ -1639,7 +1639,7 @@ CREATE POLICY "Allow anon access" ON keepsafe_vault FOR ALL USING (true) WITH CH
           <div>
             <h4 style="margin:0 0 4px 0; font-size:15px; color:var(--text);">One-Click Encrypted Backup (.vault)</h4>
             <p style="margin:0; font-size:13px; color:var(--text-dim); line-height:1.4;">
-              Mag-download ng backup file na naglalaman ng lahat ng iyong dokumento, larawan, at accounts. Naka-encrypt gamit ang iyong password.
+              Download a standalone backup file containing all your documents, pictures, and accounts. Fully encrypted using your password.
             </p>
           </div>
         </div>
@@ -1647,29 +1647,29 @@ CREATE POLICY "Allow anon access" ON keepsafe_vault FOR ALL USING (true) WITH CH
         <div style="background:var(--surface-2); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:16px; margin-bottom:18px;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
             <div>
-              <strong style="font-size:13.5px; display:block;">I-export ang Backup File</strong>
-              <span style="font-size:12px; color:var(--text-dim);">I-save sa Google Drive, OneDrive, iCloud, o USB flash drive</span>
+              <strong style="font-size:13.5px; display:block;">Export Backup File</strong>
+              <span style="font-size:12px; color:var(--text-dim);">Save to Google Drive, OneDrive, iCloud, or a USB flash drive</span>
             </div>
             <button class="btn btn-primary" onclick="exportVaultBackupFile()">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="vertical-align:-2px; margin-right:4px;"><path d="M8 2v9M8 11l-3.5-3.5M8 11l3.5-3.5M2.5 13.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              I-download ang .vault Backup
+              Download .vault Backup
             </button>
           </div>
         </div>
 
         <div style="background:var(--surface-2); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:16px;">
-          <strong style="font-size:13.5px; display:block; margin-bottom:4px;">I-restore ang Vault mula sa Backup File</strong>
-          <span style="font-size:12px; color:var(--text-dim); display:block; margin-bottom:12px;">I-load muli ang iyong mga naunang na-save na files</span>
+          <strong style="font-size:13.5px; display:block; margin-bottom:4px;">Restore Vault from Backup File</strong>
+          <span style="font-size:12px; color:var(--text-dim); display:block; margin-bottom:12px;">Reload your previously saved backup files</span>
           <div class="field" style="margin-bottom:10px;">
             <input type="file" id="modal-restore-file" accept=".vault,.json" class="file-input-stylish">
           </div>
           <div class="field" style="margin-bottom:12px;">
-            <label>I-type ang iyong Vault Password upang i-decrypt</label>
-            <input type="password" id="modal-restore-pass" placeholder="Password ng vault">
+            <label>Enter your Vault Password to decrypt</label>
+            <input type="password" id="modal-restore-pass" placeholder="Vault password">
           </div>
           <button class="btn btn-ghost" id="modal-restore-btn" onclick="executeModalFileRestore()">
             <span class="btn-spinner"></span>
-            <span class="btn-text">I-restore ang mga Dokumento</span>
+            <span class="btn-text">Restore Documents</span>
           </button>
         </div>
       </div>
@@ -1948,27 +1948,27 @@ async function handleSignup(){
   const err = document.getElementById('signup-error');
   const btn = document.getElementById('signup-btn');
 
-  if(!name){ err.textContent = 'Paki-lagay ang iyong pangalan.'; return; }
-  if(name.length < 2){ err.textContent = 'Ang pangalan ay dapat hindi bababa sa 2 letra.'; return; }
-  if(p1.length < 4){ err.textContent = 'Ang password ay dapat hindi bababa sa 4 characters.'; return; }
-  if(p1 !== p2){ err.textContent = "Hindi magkatugma ang mga password."; return; }
+  if(!name){ err.textContent = 'Please enter your name.'; return; }
+  if(name.length < 2){ err.textContent = 'Name must be at least 2 characters.'; return; }
+  if(p1.length < 4){ err.textContent = 'Password must be at least 4 characters.'; return; }
+  if(p1 !== p2){ err.textContent = "Passwords do not match."; return; }
 
   const key = userKey(name);
   const users = getUsers();
   if(users[key]){
-    err.textContent = 'May account na sa pangalang ito. Mag-log in na lamang.';
+    err.textContent = 'An account with this name already exists. Please log in.';
     return;
   }
 
   err.textContent = '';
   btn.classList.add('loading');
 
-  // Suriin kung mayroon nang ganitong account sa cloud
+  // Check if account already exists in cloud
   try{
     const cfg = getCloudConfig();
     const existingCloud = await pullFromCloudflare(cfg, key);
     if(existingCloud){
-      err.textContent = 'May account na sa Cloud gamit ang pangalang ito! Pumunta sa Log in.';
+      err.textContent = 'An account with this name already exists in Cloud! Please log in.';
       btn.classList.remove('loading');
       return;
     }
@@ -1985,7 +1985,7 @@ async function handleSignup(){
   try{
     saveUsers(users);
   }catch(e){
-    err.textContent = 'Hindi mai-save sa browser. Tingnan ang storage permissions.';
+    err.textContent = 'Could not save to browser. Check storage permissions.';
     btn.classList.remove('loading');
     return;
   }
@@ -1999,9 +1999,9 @@ async function handleSignup(){
 
   await new Promise(r=>setTimeout(r, 400));
   await enterApp();
-  showToast('Maligayang pagdating sa Keepsafe, ' + name + '!');
+  showToast('Welcome to Keepsafe, ' + name + '!');
 
-  // Awtomatikong i-sync ang bagong account sa Cloudflare
+  // Automatically sync new account to Cloudflare
   try{
     await syncVaultToCloud(true);
   }catch(e){
@@ -2016,27 +2016,27 @@ async function handleLogin(){
   const btn = document.getElementById('login-btn');
   const remember = document.getElementById('remember-me').checked;
 
-  if(!name){ err.textContent = 'Paki-lagay ang iyong pangalan.'; return; }
-  if(!pass){ err.textContent = 'Paki-lagay ang iyong password.'; return; }
+  if(!name){ err.textContent = 'Please enter your name.'; return; }
+  if(!pass){ err.textContent = 'Please enter your password.'; return; }
 
   const key = userKey(name);
   let users = getUsers();
 
-  // KUNG WALA ANG ACCOUNT SA LOCAL BROWSER -> KUNIN SA CLOUDFLARE
+  // If account does not exist locally -> pull from Cloudflare
   if(!users[key]){
     btn.classList.add('loading');
-    err.textContent = 'Kinukumpirma ang account sa Cloud...';
+    err.textContent = 'Verifying account in Cloud...';
     try{
       const cloudCfg = getCloudConfig();
       const resData = await pullFromCloudflare(cloudCfg, key);
       
       if(!resData){
-        err.textContent = 'Walang account na nahanap sa pangalang ito (local o cloud).';
+        err.textContent = 'No account found with this name (local or cloud).';
         btn.classList.remove('loading');
         return;
       }
 
-      // Nahanap sa Cloud! I-decrypt gamit ang password
+      // Found in Cloud! Decrypt using password
       const rawEncrypted = resData.encrypted_data || resData;
       const hash = await sha256(pass);
       let decrypted;
@@ -2044,12 +2044,12 @@ async function handleLogin(){
         decrypted = await decryptVaultPayload(rawEncrypted, hash);
       }catch(decErr){
         console.warn('Password decryption failed:', decErr);
-        err.textContent = 'Maling password para sa account na ito.';
+        err.textContent = 'Incorrect password for this account.';
         btn.classList.remove('loading');
         return;
       }
 
-      // Tagumpay ang pag-decrypt! I-save ang account at docs sa browser
+      // Decryption successful! Save account and docs to browser
       const restoredUser = decrypted.user || {
         name: name,
         passHash: hash,
@@ -2077,17 +2077,17 @@ async function handleLogin(){
       btn.classList.remove('loading');
       err.textContent = '';
       await enterApp();
-      showToast(\`Maligayang pagbabalik, \${name}! Naka-sync na ang vault mula sa Cloud.\`);
+      showToast(\`Welcome back, \${name}! Vault synced from Cloud.\`);
       return;
     }catch(cloudErr){
       console.error('Cloud auto-login error:', cloudErr);
-      err.textContent = 'Hindi makakonekta sa Cloud: ' + (cloudErr.message || cloudErr);
+      err.textContent = 'Could not connect to Cloud: ' + (cloudErr.message || cloudErr);
       btn.classList.remove('loading');
       return;
     }
   }
 
-  // KUNG NASA LOCAL STORAGE NA ANG ACCOUNT
+  // If account is already in local storage
   err.textContent = '';
   btn.classList.add('loading');
 
@@ -2095,7 +2095,7 @@ async function handleLogin(){
 
   const hash = await sha256(pass);
   if(hash !== users[key].passHash){
-    err.textContent = 'Maling password.';
+    err.textContent = 'Incorrect password.';
     btn.classList.remove('loading');
     return;
   }
@@ -2115,9 +2115,9 @@ async function handleLogin(){
 
   await new Promise(r=>setTimeout(r, 400));
   await enterApp();
-  showToast('Maligayang pagbabalik, ' + currentUser.name + '!');
+  showToast('Welcome back, ' + currentUser.name + '!');
 
-  // Tahimik na i-check sa cloud kung may bagong docs mula sa ibang browser/device
+  // Silently check cloud for new docs from other devices
   try{
     const cfg = getCloudConfig();
     const cloudData = await pullFromCloudflare(cfg, key);
@@ -2539,9 +2539,9 @@ function openDetail(id){
     if(isImg){
       fileBox.innerHTML = \`
         <div style="position:relative; width:100%; display:flex; flex-direction:column; align-items:center; padding:8px 0;">
-          <img src="\${fileUrl}" alt="\${escapeHtml(docName)}" style="max-width:100%; max-height:260px; object-fit:contain; border-radius:8px; cursor:zoom-in; box-shadow:0 4px 14px rgba(0,0,0,0.3);" onclick="openFullscreenPreview()" title="I-click para i-fullscreen">
+          <img src="\${fileUrl}" alt="\${escapeHtml(docName)}" style="max-width:100%; max-height:260px; object-fit:contain; border-radius:8px; cursor:zoom-in; box-shadow:0 4px 14px rgba(0,0,0,0.3);" onclick="openFullscreenPreview()" title="Click to view fullscreen">
           <div style="margin-top:8px; display:flex; gap:8px;">
-            <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">🔍 Palakihin ang Litrato</button>
+            <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">🔍 View Full Image</button>
           </div>
         </div>\`;
     } else if(isPdf){
@@ -2561,7 +2561,7 @@ function openDetail(id){
             <div style="font-weight:500; font-size:13px; color:var(--text); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">\${escapeHtml(doc.fileName || docName)}</div>
             <div style="font-size:12px; color:var(--text-dim);">\${escapeHtml(doc.fileType || 'Document File')}</div>
           </div>
-          <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">Buksan</button>
+          <button class="btn btn-ghost" style="font-size:12px; padding:4px 10px;" onclick="openFullscreenPreview()">Open</button>
         </div>\`;
     }
   } else {
@@ -2642,7 +2642,7 @@ function openFullscreenPreview(){
     bodyEl.innerHTML = \`<pre style="width:100%; height:100%; margin:0; padding:24px; background:var(--surface-2); color:var(--text); border-radius:8px; overflow:auto; font-family:monospace; font-size:14px; line-height:1.6; white-space:pre-wrap;">\${escapeHtml(textContent)}</pre>\`;
   } else {
     iconEl.innerHTML = ICONS.pdf || '📁';
-    bodyEl.innerHTML = \`<div style="text-align:center; color:var(--text);"><p style="font-size:16px; margin-bottom:12px;">Walang direktang preview para sa format na ito.</p><button class="btn btn-primary" onclick="downloadCurrentDoc()">I-download ang File</button></div>\`;
+    bodyEl.innerHTML = \`<div style="text-align:center; color:var(--text);"><p style="font-size:16px; margin-bottom:12px;">No direct preview available for this file format.</p><button class="btn btn-primary" onclick="downloadCurrentDoc()">Download File</button></div>\`;
   }
 
   document.getElementById('preview-lightbox').classList.add('show');
@@ -2726,7 +2726,7 @@ async function triggerPwaInstall() {
     const sidebarInstall = document.getElementById('sidebar-install-item');
     if (sidebarInstall) sidebarInstall.style.display = 'none';
   } else {
-    alert('Para i-install sa iyong device:\\n\\n• Sa Android Chrome: Pindutin ang tatlong tuldok (⋮) sa browser at piliin ang "Install app" o "Add to Home screen".\\n• Sa iPhone / iPad Safari: Pindutin ang Share button (parisukat na may pataas na arrow) at piliin ang "Add to Home Screen".\\n• Sa Windows Edge/Chrome: Pindutin ang Install icon sa address bar.');
+    alert('To install on your device:\\n\\n• Android Chrome: Tap the three dots (⋮) and choose "Install app" or "Add to Home screen".\\n• iPhone / iPad Safari: Tap the Share button and choose "Add to Home Screen".\\n• Windows Edge/Chrome: Click the Install icon in the address bar.');
   }
 }
 
@@ -2848,7 +2848,7 @@ async function encryptVaultPayload(payloadObj, secret){
 
 async function decryptVaultPayload(encryptedObj, secret){
   if(!encryptedObj || !encryptedObj.ciphertext || !encryptedObj.salt || !encryptedObj.iv){
-    throw new Error('Di-wastong format ng encrypted vault data');
+    throw new Error('Invalid encrypted vault data format');
   }
   const salt = base64ToBuffer(encryptedObj.salt);
   const iv = base64ToBuffer(encryptedObj.iv);
@@ -2921,7 +2921,7 @@ async function testCloudflareConnection(){
   const token = document.getElementById('cfg-cf-token').value.trim();
   const btn = document.getElementById('btn-test-cf');
   if(!url){
-    showToast('Paki-lagay muna ang Cloudflare Worker URL', true);
+    showToast('Please enter the Cloudflare Worker URL first', true);
     return;
   }
   btn.classList.add('loading');
@@ -2933,10 +2933,10 @@ async function testCloudflareConnection(){
     if(!res.ok) throw new Error(\`HTTP \${res.status}\`);
     const data = await res.json();
     btn.classList.remove('loading');
-    alert(\`✅ Matagumpay ang Koneksyon sa Cloudflare!\\n\\nStatus: \${data.status}\\nStorage: \${data.storage_type || 'Active'}\\nService: \${data.service}\`);
+    alert(\`✅ Cloudflare Connection Successful!\\n\\nStatus: \${data.status}\\nStorage: \${data.storage_type || 'Active'}\\nService: \${data.service}\`);
   }catch(e){
     btn.classList.remove('loading');
-    alert(\`❌ Nabigo ang koneksyon sa Cloudflare: \${e.message}\\n\\nSiguraduhing naka-deploy ang Cloudflare Worker at tama ang URL.\`);
+    alert(\`❌ Cloudflare connection failed: \${e.message}\\n\\nEnsure the Cloudflare Worker is deployed and URL is correct.\`);
   }
 }
 
@@ -2957,7 +2957,7 @@ async function requestPersistentStorage(){
 async function enableStoragePersistence(){
   const granted = await requestPersistentStorage();
   if(granted){
-    showToast('Storage persistence granted! Protektado na laban sa cache clearing.');
+    showToast('Storage persistence granted! Protected against cache clearing.');
   } else {
     showToast('Storage persistence is already managed by your browser.');
   }
@@ -2971,10 +2971,10 @@ async function updatePersistenceUI(isPersisted){
   }
   if(textEl && btn){
     if(isPersisted){
-      textEl.textContent = '✅ Ligtas: Naka-lock ang data laban sa automatic browser eviction.';
+      textEl.textContent = '✅ Secured: Data is protected against automatic browser eviction.';
       btn.style.display = 'none';
     } else {
-      textEl.textContent = 'Pumipigil sa browser na kusang burahin ang iyong local cache';
+      textEl.textContent = 'Prevents the browser from automatically evicting your local cache';
       btn.style.display = 'inline-flex';
     }
   }
@@ -3001,7 +3001,7 @@ async function pushToSupabase(cfg, userKeyStr, encryptedData){
   if(!res.ok){
     const errText = await res.text();
     if(res.status === 404 || errText.includes('does not exist')){
-      throw new Error('SQL table hindi pa nagagawa sa Supabase. Sundin ang SQL guide sa ibaba.');
+      throw new Error('SQL table not yet created in Supabase. Follow SQL guide below.');
     }
     throw new Error(\`Supabase Error (\${res.status}): \${errText}\`);
   }
@@ -3331,13 +3331,13 @@ function updateCloudStatusUI(){
   if(!configured){
     if(badge){ badge.className = 'status-indicator-badge'; badge.textContent = '○ Disconnected'; }
     if(dot){ dot.className = 'cloud-status-dot disconnected'; }
-    if(desc){ desc.textContent = 'Ikonekta sa Cloudflare Worker o Supabase para awtomatikong naka-save ang lahat ng iyong dokumento sa cloud.'; }
+    if(desc){ desc.textContent = 'Connect to Cloudflare Worker or Supabase to automatically keep your documents backed up in the cloud.'; }
   } else {
     const provName = prov === 'cloudflare' ? 'Cloudflare Workers' : 'Supabase';
     const host = prov === 'cloudflare' ? (cfg.cfUrl || cfg.url || '').replace(/^https?:\\/\\//, '').split('/')[0] : (cfg.url || '').replace(/^https?:\\/\\//, '').split('.')[0] + '.supabase.co';
     if(badge){ badge.className = 'status-indicator-badge ok'; badge.textContent = \`● Connected to \${provName}\`; }
     if(dot){ dot.className = 'cloud-status-dot connected'; }
-    if(desc){ desc.textContent = \`Naka-link sa \${host} (Auto-sync: \${cfg.autosync !== false ? 'ON' : 'OFF'}, On Open: \${cfg.syncOnOpen !== false ? 'ON' : 'OFF'})\`; }
+    if(desc){ desc.textContent = \`Linked to \${host} (Auto-sync: \${cfg.autosync !== false ? 'ON' : 'OFF'}, On Open: \${cfg.syncOnOpen !== false ? 'ON' : 'OFF'})\`; }
   }
 }
 
@@ -3370,7 +3370,7 @@ async function syncVaultToCloud(isSilent = false){
     }
     localStorage.setItem(LS_LAST_SYNC, new Date().toISOString());
     updateCloudStatusUI();
-    if(!isSilent) showToast('Cloud sync complete! Ligtas na naka-save sa Cloudflare.');
+    if(!isSilent) showToast('Cloud sync complete! Securely saved to Cloudflare.');
     return true;
   }catch(err){
     console.error('Cloud Sync failed:', err);
@@ -3388,7 +3388,7 @@ async function saveCloudSettingsAndSync(){
     const cfUrl = document.getElementById('cfg-cf-url').value.trim();
     const cfToken = document.getElementById('cfg-cf-token').value.trim();
     if(!cfUrl){
-      showToast('Paki-lagay ang Cloudflare Worker URL', true);
+      showToast('Please enter the Cloudflare Worker URL', true);
       return;
     }
     newCfg.cfUrl = cfUrl;
@@ -3398,7 +3398,7 @@ async function saveCloudSettingsAndSync(){
     const url = document.getElementById('cfg-cloud-url').value.trim();
     const key = document.getElementById('cfg-cloud-key').value.trim();
     if(!url || !key){
-      showToast('Paki-lagay ang Supabase URL at Public Anon Key', true);
+      showToast('Please enter Supabase URL and Public Anon Key', true);
       return;
     }
     newCfg.url = url;
@@ -3420,7 +3420,7 @@ async function saveCloudSettingsAndSync(){
 }
 
 function disconnectCloud(){
-  if(confirm('Nais mo bang idiskonekta ang Cloud connection? Ang iyong local data ay mananatili.')){
+  if(confirm('Disconnect Cloud connection? Your local data will remain intact.')){
     localStorage.removeItem(LS_CLOUD_CONFIG);
     localStorage.removeItem(LS_LAST_SYNC);
     updateCloudStatusUI();
@@ -3432,7 +3432,7 @@ async function pullFromCloudManual(){
   if(!currentUser) return;
   const cfg = getCloudConfig();
   if(!isCloudConfigured(cfg)){
-    showToast('I-save muna ang Cloudflare Worker o Supabase URL', true);
+    showToast('Please save Cloudflare Worker or Supabase URL first', true);
     return;
   }
   const btn = document.getElementById('btn-pull-cloud');
@@ -3449,7 +3449,7 @@ async function pullFromCloudManual(){
     }
 
     if(!encrypted){
-      alert('Walang nakitang naka-sync na vault sa cloud para sa account na ito.');
+      alert('No synced vault found in the cloud for this account.');
       btn.classList.remove('loading');
       return;
     }
@@ -3461,7 +3461,7 @@ async function pullFromCloudManual(){
       }
       await loadDocs();
       render();
-      showToast(\`Naibalik ang \${decrypted.docs.length} mga dokumento mula sa Cloud!\`);
+      showToast(\`Restored \${decrypted.docs.length} documents from Cloud!\`);
     }
   }catch(e){
     alert('Failed to pull from cloud: ' + e.message);
@@ -3493,7 +3493,7 @@ async function exportVaultBackupFile(){
     document.body.appendChild(a);
     a.click();
     a.remove();
-    showToast('Backup file downloaded! Maaari mo itong i-save sa Google Drive, OneDrive, o USB.');
+    showToast('Backup file downloaded! You can save it to Google Drive, OneDrive, or USB.');
   }catch(err){
     showToast('Export failed: ' + err.message, true);
   }
@@ -3505,11 +3505,11 @@ async function executeModalFileRestore(){
   const btn = document.getElementById('modal-restore-btn');
 
   if(!fileInput.files || fileInput.files.length === 0){
-    showToast('Pumili ng .vault backup file', true);
+    showToast('Please select a .vault backup file', true);
     return;
   }
   if(!passInput.value){
-    showToast('Ilagay ang iyong vault password', true);
+    showToast('Please enter your vault password', true);
     return;
   }
 
@@ -3530,10 +3530,10 @@ async function executeModalFileRestore(){
       await loadDocs();
       render();
       closeCloudModal();
-      showToast(\`Tagumpay! Naibalik ang \${decrypted.docs.length} mga dokumento mula sa backup file.\`);
+      showToast(\`Success! Restored \${decrypted.docs.length} documents from backup file.\`);
     }
   }catch(err){
-    alert('Maling password o sira ang backup file: ' + err.message);
+    alert('Incorrect password or corrupted backup file: ' + err.message);
   } finally {
     btn.classList.remove('loading');
   }
@@ -3547,11 +3547,11 @@ async function executeFileRecovery(){
   const btn = document.getElementById('rec-file-btn');
 
   if(!fileInput.files || fileInput.files.length === 0){
-    errEl.textContent = 'Pumili muna ng .vault backup file.';
+    errEl.textContent = 'Please select a .vault backup file first.';
     return;
   }
   if(!passInput.value){
-    errEl.textContent = 'Ilagay ang iyong vault password.';
+    errEl.textContent = 'Please enter your vault password.';
     return;
   }
 
@@ -3566,7 +3566,7 @@ async function executeFileRecovery(){
     const decrypted = await decryptVaultPayload(encrypted, hash);
 
     if(!decrypted.user){
-      throw new Error('Walang account data sa backup file.');
+      throw new Error('No account data in backup file.');
     }
 
     const restoredUser = decrypted.user;
@@ -3592,9 +3592,9 @@ async function executeFileRecovery(){
 
     closeGateRecoverModal();
     await enterApp();
-    showToast(\`Maligayang pagbabalik! Naibalik ang \${decrypted.docs ? decrypted.docs.length : 0} files.\`);
+    showToast(\`Welcome back! Restored \${decrypted.docs ? decrypted.docs.length : 0} files.\`);
   }catch(err){
-    errEl.textContent = 'Maling password o hindi wastong backup file.';
+    errEl.textContent = 'Incorrect password or invalid backup file.';
   } finally {
     btn.classList.remove('loading');
   }
@@ -3613,7 +3613,7 @@ async function executeCloudRecovery(){
     const cfUrl = document.getElementById('rec-cf-url').value.trim();
     const cfToken = document.getElementById('rec-cf-token').value.trim();
     if(!cfUrl || !userName || !pass){
-      errEl.textContent = 'Paki-kumpleto ang Worker URL, Username, at Password.';
+      errEl.textContent = 'Please complete Worker URL, Username, and Password.';
       return;
     }
     cfg.cfUrl = cfUrl;
@@ -3623,7 +3623,7 @@ async function executeCloudRecovery(){
     const url = document.getElementById('rec-cloud-url').value.trim();
     const key = document.getElementById('rec-cloud-key').value.trim();
     if(!url || !key || !userName || !pass){
-      errEl.textContent = 'Paki-kumpleto ang Supabase URL, Key, Username, at Password.';
+      errEl.textContent = 'Please complete Supabase URL, Key, Username, and Password.';
       return;
     }
     cfg.url = url;
@@ -3643,7 +3643,7 @@ async function executeCloudRecovery(){
     }
 
     if(!encrypted){
-      throw new Error(\`Walang nakitang naka-save na vault sa \${prov === 'cloudflare' ? 'Cloudflare' : 'Supabase'} para sa user na ito.\`);
+      throw new Error(\`No saved vault found in \${prov === 'cloudflare' ? 'Cloudflare' : 'Supabase'} for this user.\`);
     }
 
     const hash = await sha256(pass);
@@ -3676,9 +3676,9 @@ async function executeCloudRecovery(){
 
     closeGateRecoverModal();
     await enterApp();
-    showToast(\`Naka-konekta sa Cloud! Naibalik ang \${decrypted.docs ? decrypted.docs.length : 0} files.\`);
+    showToast(\`Connected to Cloud! Restored \${decrypted.docs ? decrypted.docs.length : 0} files.\`);
   }catch(err){
-    errEl.textContent = err.message || 'Maling impormasyon o koneksyon.';
+    errEl.textContent = err.message || 'Invalid credentials or connection error.';
   } finally {
     btn.classList.remove('loading');
   }
@@ -3718,7 +3718,7 @@ async function checkAndAutoSyncOnOpen(){
           }
           await loadDocs();
           render();
-          showToast(\`☁️ Na-sync mula sa Cloud (\${decrypted.docs.length} mga dokumento)\`);
+          showToast(\`☁️ Synced from Cloud (\${decrypted.docs.length} documents)\`);
         }
       }
     } else {
