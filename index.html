@@ -1180,6 +1180,7 @@
       </div>
     </div>
     <div class="modal-foot">
+      <button class="btn btn-primary" id="detail-view" onclick="viewCurrentDoc()" style="margin-right:auto;">Buksan / View</button>
       <button class="btn btn-ghost" id="detail-download" onclick="downloadCurrentDoc()">Download</button>
       <button class="btn btn-ghost" onclick="editCurrentDoc()">Edit</button>
       <button class="btn btn-danger-text" onclick="deleteCurrentDoc()">Delete</button>
@@ -2360,11 +2361,15 @@ function openDetail(id){
   if(!doc) return;
   state.detailId = id;
   const st = computeStatus(doc);
-  document.getElementById('detail-title').textContent = doc.name;
+  const docName = doc.name || doc.title || 'Untitled Document';
+  document.getElementById('detail-title').textContent = docName;
   document.getElementById('detail-category').textContent = getCatLabel(doc.category);
   document.getElementById('detail-status').innerHTML = statusBadge(st);
   document.getElementById('detail-expiry').textContent = doc.expiry ? formatDate(doc.expiry) : 'No expiry';
-  document.getElementById('detail-added').textContent = formatDate(doc.addedAt.slice(0,10));
+  
+  const rawAdded = doc.addedAt || doc.createdAt || new Date().toISOString();
+  document.getElementById('detail-added').textContent = formatDate(rawAdded.slice(0,10));
+
   const notesWrap = document.getElementById('detail-notes-wrap');
   if(doc.notes){
     notesWrap.style.display='block';
@@ -2372,17 +2377,21 @@ function openDetail(id){
   } else {
     notesWrap.style.display='none';
   }
+
   const fileBox = document.getElementById('detail-file');
   const dlBtn = document.getElementById('detail-download');
-  if(doc.fileDataUrl){
-    dlBtn.style.display='inline-flex';
-    if(doc.fileType && doc.fileType.startsWith('image/')){
-      fileBox.innerHTML = `<img src="${doc.fileDataUrl}">`;
+  const fileUrl = doc.fileDataUrl || doc.dataUrl;
+
+  if(fileUrl){
+    if(dlBtn) dlBtn.style.display='inline-flex';
+    const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
+    if(isImg){
+      fileBox.innerHTML = `<img src="${fileUrl}" style="max-width:100%;max-height:240px;border-radius:8px;object-fit:contain;cursor:pointer;" onclick="viewCurrentDoc()" title="Click to view full size">`;
     } else {
-      fileBox.innerHTML = `<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;">${ICONS.pdf}</div>`;
+      fileBox.innerHTML = `<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;cursor:pointer;" onclick="viewCurrentDoc()" title="Click to open">${ICONS.pdf}</div>`;
     }
   } else {
-    dlBtn.style.display='none';
+    if(dlBtn) dlBtn.style.display='none';
     fileBox.innerHTML = `<div class="fp-ic" style="width:52px;height:52px;border-radius:10px;">${getCatIcon(doc.category)}</div>`;
   }
   document.getElementById('detail-overlay').classList.add('show');
@@ -2413,46 +2422,50 @@ async function deleteCurrentDoc(){
 }
 function downloadCurrentDoc(){
   const doc = state.docs.find(d=>d.id===state.detailId);
-  if(!doc || !doc.fileDataUrl) return;
+  if(!doc) return;
+  const fileUrl = doc.fileDataUrl || doc.dataUrl;
+  if(!fileUrl) return;
   const a = document.createElement('a');
-  a.href = doc.fileDataUrl;
-  a.download = doc.fileName || doc.name;
+  a.href = fileUrl;
+  a.download = doc.fileName || doc.name || doc.title || 'document';
   document.body.appendChild(a);
   a.click();
   a.remove();
 }
 
-/* ================= TOAST ================= */
-let toastTimer;
-function showToast(msg, isError){
-  const t = document.getElementById('toast');
-  document.getElementById('toast-text').textContent = msg;
-  t.querySelector('.dot').style.background = isError ? 'var(--bad)' : 'var(--ok)';
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
-}
+function viewCurrentDoc(){
+  const doc = state.docs.find(d=>d.id===state.detailId);
+  if(!doc) return;
+  const fileUrl = doc.fileDataUrl || doc.dataUrl;
+  if(!fileUrl) return;
+  const docTitle = escapeHtml(doc.name || doc.title || 'Document');
+  
+  // Try opening in new tab
+  try {
+    const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
+    const isPdf = (doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf');
+    const isText = (doc.fileType && doc.fileType.startsWith('text/')) || fileUrl.startsWith('data:text/');
 
-// close overlays on backdrop click
-const docOverlayEl = document.getElementById('doc-overlay');
-if(docOverlayEl) docOverlayEl.addEventListener('click', e=>{ if(e.target.id==='doc-overlay') closeDocModal(); });
-
-const detailOverlayEl = document.getElementById('detail-overlay');
-if(detailOverlayEl) detailOverlayEl.addEventListener('click', e=>{ if(e.target.id==='detail-overlay') closeDetailModal(); });
-
-const cloudOverlayEl = document.getElementById('cloud-overlay');
-if(cloudOverlayEl) cloudOverlayEl.addEventListener('click', e=>{ if(e.target.id==='cloud-overlay') closeCloudModal(); });
-
-const gateRecOverlayEl = document.getElementById('gate-recover-overlay');
-if(gateRecOverlayEl) gateRecOverlayEl.addEventListener('click', e=>{ if(e.target.id==='gate-recover-overlay') closeGateRecoverModal(); });
-
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){
-    closeDocModal();
-    closeDetailModal();
-    closeCloudModal();
-    closeGateRecoverModal();
+    const win = window.open();
+    if(win){
+      if(isImg){
+        win.document.write(`<!DOCTYPE html><html><head><title>${docTitle}</title></head><body style="margin:0;background:#0d0f10;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${fileUrl}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body></html>`);
+      } else if(isText){
+        let decodedText = '';
+        try {
+          const base64Part = fileUrl.split(',')[1];
+          decodedText = atob(base64Part);
+        } catch(e){ decodedText = fileUrl; }
+        win.document.write(`<!DOCTYPE html><html><head><title>${docTitle}</title></head><body style="margin:20px;background:#0d0f10;color:#ece8df;font-family:sans-serif;white-space:pre-wrap;">${escapeHtml(decodedText)}</body></html>`);
+      } else {
+        win.location.href = fileUrl;
+      }
+      return;
+    }
+  } catch(e){
+    console.log('Window open note:', e);
   }
+  downloadCurrentDoc();
 });
 
 // Explicit event listeners for Cloud & Backup buttons to ensure 100% responsiveness
