@@ -2592,7 +2592,7 @@ function viewCurrentDoc(){
     console.log('Window open note:', e);
   }
   downloadCurrentDoc();
-});
+}
 
 // Explicit event listeners for Cloud & Backup buttons to ensure 100% responsiveness
 function attachCloudButtonListeners(){
