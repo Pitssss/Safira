@@ -1678,6 +1678,7 @@
   }
 
 </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 <!-- ============ SIGN UP GATE ============ -->
@@ -2429,6 +2430,10 @@
           <button type="button" class="provider-pill active" id="prov-btn-cf" onclick="switchCloudProvider('cloudflare')">
             <span>☁️ Cloudflare Workers KV</span>
           </button>
+                    <button type="button" class="provider-pill" id="prov-btn-gdrive" onclick="switchCloudProvider('gdrive')">
+            <svg width="15" height="15" viewBox="0 0 87.3 78" fill="none" style="vertical-align:-2px;"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44c-.8 1.4-1.2 2.95-1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+            <span>Google Drive (15 GB)</span>
+          </button>
           <button type="button" class="provider-pill" id="prov-btn-sb" onclick="switchCloudProvider('supabase')">
             <span>⚡ Supabase Database</span>
           </button>
@@ -2455,6 +2460,69 @@
         </div>
 
         <!-- Supabase Provider Settings -->
+        
+        <!-- Google Drive Provider Settings (15 GB Free Direct Sync) -->
+        <div id="provider-section-gdrive" style="display:none;">
+          <div style="background:var(--surface-2); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:16px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+              <svg width="32" height="32" viewBox="0 0 87.3 78" fill="none"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44c-.8 1.4-1.2 2.95-1.2 4.5h27.5z" fill="#00ac47"/><path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/><path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>
+              <div>
+                <h4 style="margin:0 0 2px 0; font-size:15px; color:var(--text);">Google Drive Personal Cloud (15 GB Free)</h4>
+                <div style="font-size:12px; color:var(--text-dim);" id="gdrive-status-desc">Zero-knowledge AES-256 encrypted sync directly into your personal Google Drive app folder.</div>
+              </div>
+            </div>
+
+            <!-- Disconnected State -->
+            <div id="gdrive-disconnected-box">
+              <div class="field" style="margin-bottom:12px;">
+                <label>Google OAuth Client ID</label>
+                <input type="text" id="cfg-gdrive-client-id" placeholder="e.g. 123456789-abcdef.apps.googleusercontent.com" oninput="saveGdriveClientId(this.value)">
+                <div class="field-hint">Paste your free Google OAuth 2.0 Client ID here (see quick guide below).</div>
+              </div>
+              <button type="button" class="btn btn-primary" id="btn-connect-gdrive" onclick="connectGoogleDrive()" style="width:100%; justify-content:center; gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/></svg>
+                Connect Google Drive (15 GB Free)
+              </button>
+            </div>
+
+            <!-- Connected State -->
+            <div id="gdrive-connected-box" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding:12px 14px; background:var(--surface-3); border-radius:var(--radius-s);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--ok);"></span>
+                  <div>
+                    <strong id="gdrive-user-email" style="font-size:13px; color:var(--text); display:block;">Connected</strong>
+                    <span style="font-size:11.5px; color:var(--ok);">15 GB Free Quota Enabled</span>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-ghost" onclick="disconnectGoogleDrive()" style="font-size:11px; padding:4px 8px; color:var(--bad);">Disconnect</button>
+              </div>
+
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-primary" id="btn-sync-gdrive" onclick="syncVaultToGoogleDrive()" style="flex:1; justify-content:center;">
+                  <span class="btn-spinner"></span>
+                  <span>Sync to Google Drive</span>
+                </button>
+                <button type="button" class="btn btn-ghost" id="btn-pull-gdrive" onclick="pullVaultFromGoogleDrive()" style="flex:1; justify-content:center;">
+                  <span>Restore from GDrive</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step-by-Step Google Setup Guide -->
+          <details id="setup-guide-gdrive" style="background:var(--surface-2); border:1px solid var(--border-soft); border-radius:var(--radius-m); padding:12px 14px; margin-top:14px;">
+            <summary style="cursor:pointer; font-size:13px; font-weight:600; color:var(--text);">How to get your free Google Client ID in 2 minutes (Step-by-Step)</summary>
+            <ol style="font-size:12.5px; color:var(--text-dim); line-height:1.6; padding-left:20px; margin-top:8px; margin-bottom:4px;">
+              <li>Open <a href="https://console.cloud.google.com" target="_blank" style="color:var(--primary); text-decoration:underline;">console.cloud.google.com</a> and create a project (e.g. <code>My Vault</code>).</li>
+              <li>Go to <strong>APIs &amp; Services &gt; Library</strong>, search for <strong>Google Drive API</strong>, and click <strong>Enable</strong>.</li>
+              <li>Go to <strong>Credentials &gt; Create Credentials &gt; OAuth client ID</strong>.</li>
+              <li>Select <strong>Web application</strong>, and under <strong>Authorized JavaScript origins</strong> add: <code>https://safira.gbrielsales11.workers.dev</code> (and <code>http://localhost</code> for testing).</li>
+              <li>Copy your generated <strong>Client ID</strong> and paste it above!</li>
+            </ol>
+          </details>
+        </div>
+
         <div id="provider-section-sb" style="display:none;">
           <div class="field">
             <label>Supabase Project URL</label>
@@ -2806,6 +2874,235 @@ function saveUsers(users){
 function userKey(name){
   return name.trim().toLowerCase();
 }
+
+
+/* ================= GOOGLE DRIVE (15 GB FREE) ENGINE ================= */
+const LS_GDRIVE_CLIENT_ID = 'keepsafe_gdrive_client_id';
+const LS_GDRIVE_TOKEN = 'keepsafe_gdrive_token';
+const LS_GDRIVE_USER = 'keepsafe_gdrive_user';
+const GDRIVE_BACKUP_NAME = 'safira_vault_backup.enc';
+
+let gdriveTokenClient = null;
+
+function saveGdriveClientId(val){
+  localStorage.setItem(LS_GDRIVE_CLIENT_ID, (val || '').trim());
+}
+
+function getGdriveClientId(){
+  return localStorage.getItem(LS_GDRIVE_CLIENT_ID) || '';
+}
+
+function getGdriveToken(){
+  return sessionStorage.getItem(LS_GDRIVE_TOKEN) || '';
+}
+
+function updateGoogleDriveUI(){
+  const clientId = getGdriveClientId();
+  const inp = document.getElementById('cfg-gdrive-client-id');
+  if(inp && !inp.value && clientId) inp.value = clientId;
+
+  const token = getGdriveToken();
+  const userEmail = localStorage.getItem(LS_GDRIVE_USER);
+  const disBox = document.getElementById('gdrive-disconnected-box');
+  const conBox = document.getElementById('gdrive-connected-box');
+  const emailEl = document.getElementById('gdrive-user-email');
+
+  if(token && userEmail){
+    if(disBox) disBox.style.display = 'none';
+    if(conBox) conBox.style.display = 'block';
+    if(emailEl) emailEl.textContent = 'Connected: ' + userEmail;
+  } else {
+    if(disBox) disBox.style.display = 'block';
+    if(conBox) conBox.style.display = 'none';
+  }
+}
+
+function connectGoogleDrive(onSuccess){
+  const clientId = getGdriveClientId();
+  if(!clientId){
+    alert('Please enter your Google OAuth Client ID first. Follow the quick step-by-step guide below.');
+    const guide = document.getElementById('setup-guide-gdrive');
+    if(guide) guide.open = true;
+    return;
+  }
+
+  if(typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2){
+    alert('Google Identity Services library is still loading. Please wait a few seconds and try again.');
+    return;
+  }
+
+  try {
+    gdriveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email',
+      callback: async (resp) => {
+        if(resp.error){
+          console.error('Google auth error:', resp);
+          alert('Google authentication failed: ' + (resp.error_description || resp.error));
+          return;
+        }
+        if(resp.access_token){
+          sessionStorage.setItem(LS_GDRIVE_TOKEN, resp.access_token);
+          try {
+            const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: 'Bearer ' + resp.access_token }
+            });
+            const userData = await userRes.json();
+            const email = userData.email || 'Google User';
+            localStorage.setItem(LS_GDRIVE_USER, email);
+          }catch(e){
+            localStorage.setItem(LS_GDRIVE_USER, 'Google User');
+          }
+          updateGoogleDriveUI();
+          showToast('Google Drive connected! 15 GB storage enabled.');
+          if(typeof onSuccess === 'function') onSuccess();
+        }
+      }
+    });
+    gdriveTokenClient.requestAccessToken();
+  } catch(err) {
+    console.error('Failed to init token client:', err);
+    alert('Could not start Google Sign-in: ' + err.message);
+  }
+}
+
+function disconnectGoogleDrive(){
+  const token = getGdriveToken();
+  if(token && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2){
+    google.accounts.oauth2.revoke(token, () => console.log('Google token revoked'));
+  }
+  sessionStorage.removeItem(LS_GDRIVE_TOKEN);
+  localStorage.removeItem(LS_GDRIVE_USER);
+  updateGoogleDriveUI();
+  showToast('Google Drive disconnected.');
+}
+
+async function syncVaultToGoogleDrive(isSilent){
+  if(!currentUser){
+    if(!isSilent) alert('Please log in first.');
+    return false;
+  }
+  const token = getGdriveToken();
+  if(!token){
+    connectGoogleDrive(() => syncVaultToGoogleDrive(isSilent));
+    return false;
+  }
+
+  const btn = document.getElementById('btn-sync-gdrive');
+  if(btn) btn.classList.add('loading');
+
+  try {
+    const userK = currentUser._key || userKey(currentUser.name);
+    const payload = {
+      user: {
+        name: currentUser.name,
+        passHash: currentUser.passHash,
+        avatar: currentUser.avatar || null,
+        avatarColor: currentUser.avatarColor || null,
+        createdAt: currentUser.createdAt || new Date().toISOString()
+      },
+      docs: state.docs || [],
+      syncedAt: new Date().toISOString(),
+      provider: 'gdrive'
+    };
+
+    const encrypted = await encryptVaultPayload(payload, currentUser.passHash);
+    const fileContent = JSON.stringify(encrypted);
+
+    // 1. Search if file already exists in appDataFolder
+    const q = "name = '" + GDRIVE_BACKUP_NAME + "' and 'appDataFolder' in parents and trashed = false";
+    const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=' + encodeURIComponent(q) + '&fields=files(id,name,modifiedTime)', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const searchData = await searchRes.json();
+
+    if(searchData.files && searchData.files.length > 0){
+      // Update existing file
+      const fileId = searchData.files[0].id;
+      const patchRes = await fetch('https://www.googleapis.com/upload/drive/v3/files/' + fileId + '?uploadType=media', {
+        method: 'PATCH',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: fileContent
+      });
+      if(!patchRes.ok) throw new Error('Failed to update Google Drive file: ' + patchRes.statusText);
+    } else {
+      // Create new file via multipart upload
+      const metadata = { name: GDRIVE_BACKUP_NAME, parents: ['appDataFolder'] };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', new Blob([fileContent], { type: 'application/json' }));
+
+      const postRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: form
+      });
+      if(!postRes.ok) throw new Error('Failed to create file in Google Drive: ' + postRes.statusText);
+    }
+
+    localStorage.setItem(LS_LAST_SYNC, new Date().toISOString());
+    updateCloudStatusUI();
+    showToast('Vault successfully synced to Google Drive (15 GB)!');
+    return true;
+  } catch(err) {
+    console.error('Google Drive sync error:', err);
+    if(!isSilent) alert('Google Drive sync failed: ' + err.message);
+    return false;
+  } finally {
+    if(btn) btn.classList.remove('loading');
+  }
+}
+
+async function pullVaultFromGoogleDrive(){
+  if(!currentUser){
+    alert('Please log in first.');
+    return;
+  }
+  const token = getGdriveToken();
+  if(!token){
+    connectGoogleDrive(() => pullVaultFromGoogleDrive());
+    return;
+  }
+
+  const btn = document.getElementById('btn-pull-gdrive');
+  if(btn) btn.classList.add('loading');
+
+  try {
+    const q = "name = '" + GDRIVE_BACKUP_NAME + "' and 'appDataFolder' in parents and trashed = false";
+    const searchRes = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=' + encodeURIComponent(q) + '&fields=files(id,name,modifiedTime)', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const searchData = await searchRes.json();
+    if(!searchData.files || searchData.files.length === 0){
+      alert('No backup file found in your Google Drive App Data folder yet. Click "Sync to Google Drive" to create one!');
+      return;
+    }
+
+    const fileId = searchData.files[0].id;
+    const downloadRes = await fetch('https://www.googleapis.com/drive/v3/files/' + fileId + '?alt=media', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    const encryptedData = await downloadRes.json();
+
+    const decrypted = await decryptVaultPayload(encryptedData, currentUser.passHash);
+    const userK = currentUser._key || userKey(currentUser.name);
+
+    if(Array.isArray(decrypted.docs)){
+      await reconcileWithCloudDocs(userK, decrypted.docs);
+      showToast('Restored ' + decrypted.docs.length + ' documents from Google Drive!');
+    }
+    closeCloudModal();
+  } catch(err) {
+    console.error('Google Drive pull error:', err);
+    alert('Failed to restore from Google Drive: ' + err.message);
+  } finally {
+    if(btn) btn.classList.remove('loading');
+  }
+}
+
 
 /* ================= INIT ================= */
 /* ================= INIT ================= */
