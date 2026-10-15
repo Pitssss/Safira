@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -929,8 +929,8 @@
 
 
 
-  /* ================= CLOUDSTRASH MODERN DESIGN ================= */
-  :root {
+  /* ================= CLOUDSTRASH MODERN DESIGN SYSTEM ================= */
+  :root, [data-theme="light"] {
     --bg: #F4F6FB;
     --surface: #FFFFFF;
     --surface-2: #F8FAFD;
@@ -965,27 +965,33 @@
   }
 
   [data-theme="dark"] {
-    --bg: #0D1117;
-    --surface: #161B22;
-    --surface-2: #1E242C;
-    --surface-3: #282E38;
-    --border: #30363D;
-    --border-soft: #21262D;
-    --text: #F0F6FC;
-    --text-dim: #8B949E;
-    --text-faint: #6E7681;
+    --bg: #0B0E14;
+    --surface: #12171F;
+    --surface-2: #18202C;
+    --surface-3: #202B3B;
+    --border: #283548;
+    --border-soft: #1E293B;
+    --text: #F1F5F9;
+    --text-dim: #94A3B8;
+    --text-faint: #64748B;
     --primary: #3B82F6;
     --primary-hover: #60A5FA;
-    --primary-light: rgba(59, 130, 246, 0.15);
+    --primary-light: rgba(59, 130, 246, 0.18);
     --folder-gold: #F59E0B;
-    --folder-bg: rgba(245, 158, 11, 0.15);
+    --folder-bg: rgba(245, 158, 11, 0.18);
     --brass: #3B82F6;
     --brass-bright: #60A5FA;
     --brass-dim: #2563EB;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
-    --shadow-lift: 0 16px 36px rgba(0, 0, 0, 0.6);
+    --ok: #10B981;
+    --ok-bg: rgba(16, 185, 129, 0.18);
+    --warn: #F59E0B;
+    --warn-bg: rgba(245, 158, 11, 0.18);
+    --bad: #EF4444;
+    --bad-bg: rgba(239, 68, 68, 0.18);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+    --shadow-lift: 0 16px 36px rgba(0, 0, 0, 0.7);
   }
 
   * { box-sizing: border-box; }
@@ -996,6 +1002,7 @@
     color: var(--text);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
   #app { display: none; min-height: 100vh; flex-direction: column; }
@@ -1013,6 +1020,7 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
   .navbar-left {
     display: flex;
@@ -1064,7 +1072,7 @@
   .navbar-search input:focus {
     border-color: var(--primary);
     background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   }
   .navbar-search .search-icon {
     position: absolute;
@@ -1079,13 +1087,13 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    background: var(--surface);
+    background: var(--surface-3);
     border: 1px solid var(--border);
     border-radius: 6px;
     padding: 2px 6px;
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-faint);
+    color: var(--text-dim);
     pointer-events: none;
   }
   .navbar-actions {
@@ -1118,7 +1126,7 @@
     height: 38px;
     border-radius: 50%;
     border: 1px solid var(--border);
-    background: var(--surface);
+    background: var(--surface-2);
     color: var(--text-dim);
     display: flex;
     align-items: center;
@@ -1128,7 +1136,7 @@
     transition: all 0.15s ease;
   }
   .nav-action-icon-btn:hover {
-    background: var(--surface-2);
+    background: var(--surface-3);
     color: var(--text);
   }
   .nav-profile-pill {
@@ -1163,6 +1171,7 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
   .cs-sidebar-section-title {
     font-size: 11px;
@@ -1309,7 +1318,7 @@
 
   /* Big Drag & Drop Zone */
   .cs-dropzone {
-    border: 2px dashed #CBD5E1;
+    border: 2px dashed var(--border);
     border-radius: var(--radius-l);
     background: var(--surface);
     padding: 32px 20px;
@@ -1322,7 +1331,7 @@
   .cs-dropzone:hover, .cs-dropzone.dragover {
     border-color: var(--primary);
     background: var(--primary-light);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
   }
   .cs-dropzone-icon {
     width: 48px;
@@ -1488,6 +1497,7 @@
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
   .cs-inspector-head {
     display: flex;
@@ -1706,8 +1716,9 @@
         <span class="cloud-status-dot" id="cloud-status-dot" style="position:static; margin:0;" title="Cloud Sync Status"></span>
       </button>
 
-      <button class="nav-action-icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Light/Dark Theme">
-        <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><path d="M8 1.5V3M8 13V14.5M14.5 8H13M3 8H1.5M12.5 3.5L11.4 4.6M4.6 11.4L3.5 12.5M12.5 12.5L11.4 11.4M4.6 4.6L3.5 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.3"/></svg>
+      <!-- Theme Mode Toggle (Sun/Moon) -->
+      <button class="nav-action-icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Light / Dark Mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
 
       <!-- Profile Avatar Pill -->
@@ -2489,13 +2500,12 @@ const ICONS = {
 };
 
 const CATEGORIES = [
-  {id:'passport', label:"Passport", icon:ICONS.passport},
-  {id:'license', label:"Driver's License", icon:ICONS.license},
-  {id:'birth', label:"Birth Certificate", icon:ICONS.birth},
-  {id:'insurance', label:"Insurance", icon:ICONS.insurance},
+  {id:'personal', label:"Personal Files", icon:ICONS.all},
+  {id:'passport', label:"Passports & IDs", icon:ICONS.passport},
+  {id:'insurance', label:"Insurance & Bills", icon:ICONS.insurance},
   {id:'medical', label:"Medical Records", icon:ICONS.medical},
-  {id:'property', label:"Property", icon:ICONS.property},
-  {id:'other', label:"Other", icon:ICONS.other},
+  {id:'property', label:"Property & Legal", icon:ICONS.property},
+  {id:'other', label:"Other Documents", icon:ICONS.other},
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
 function getCatLabel(catId){
@@ -2651,6 +2661,7 @@ async function init(){
     if(elIcCloseDoc && ICONS && ICONS.close) elIcCloseDoc.innerHTML = ICONS.close;
     const elIcCloseDetail = document.getElementById('ic-close-detail');
     if(elIcCloseDetail && ICONS && ICONS.close) elIcCloseDetail.innerHTML = ICONS.close;
+    
     applyTheme();
 
     const users = getUsers();
@@ -2674,16 +2685,28 @@ async function init(){
 function applyTheme(){
   const t = localStorage.getItem(LS_THEME) || 'dark';
   if(document.documentElement){
-    if(t==='light'){ document.documentElement.setAttribute('data-theme','light'); }
-    else if(document.documentElement.removeAttribute){ document.documentElement.removeAttribute('data-theme'); }
+    document.documentElement.setAttribute('data-theme', t);
+  }
+  const themeBtn = document.getElementById('theme-btn');
+  if(themeBtn){
+    if(t === 'dark'){
+      themeBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#F59E0B;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+      themeBtn.setAttribute('title', 'Switch to Light Mode');
+    } else {
+      themeBtn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#64748B;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      themeBtn.setAttribute('title', 'Switch to Dark Mode');
+    }
   }
   const lbl = document.getElementById('theme-label');
-  if(lbl) lbl.textContent = t==='light' ? 'Dark mode' : 'Light mode';
+  if(lbl) lbl.textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
 }
+
 function toggleTheme(){
-  const t = localStorage.getItem(LS_THEME) || 'dark';
-  localStorage.setItem(LS_THEME, t==='light' ? 'dark' : 'light');
+  const current = localStorage.getItem(LS_THEME) || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(LS_THEME, next);
   applyTheme();
+  showToast(next === 'dark' ? '🌙 Dark Mode enabled' : '☀️ Light Mode enabled');
 }
 
 /* ================= SCREEN SWITCHING ================= */
@@ -3245,98 +3268,297 @@ function computeStatus(doc){
 /* ================= SIDEBAR NAV ================= */
 function buildCategoryNav(){
   const list = document.getElementById('category-list');
-  list.innerHTML = CATEGORIES.map(c=>`
-    <div class="nav-item" data-cat="${c.id}" onclick="setCategory('${c.id}')">
-      <span class="nav-ic">${c.icon}</span>
-      <span class="nav-label">${c.label}</span>
-      <span class="nav-count" id="count-${c.id}">0</span>
+  if(!list) return;
+  list.innerHTML = CATEGORIES.map(c => `
+    <div class="cs-nav-item" data-cat="${c.id}" onclick="setCategory('${c.id}')">
+      <div class="cs-nav-left">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="color:var(--folder-gold);"><path d="M2.5 5.5C2.5 4.67 3.17 4 4 4H7.5L9.5 6H16C16.83 6 17.5 6.67 17.5 7.5V14.5C17.5 15.33 16.83 16 16 16H4C3.17 16 2.5 15.33 2.5 14.5V5.5Z" fill="var(--folder-bg)" stroke="currentColor" stroke-width="1.4"/></svg>
+        <span>${c.label}</span>
+      </div>
+      <span class="cs-nav-badge" id="count-${c.id}">0</span>
     </div>
   `).join('');
 }
 function setCategory(id){
   state.category = id;
-  document.querySelectorAll('.nav-item[data-cat]').forEach(el=>{
-    el.classList.toggle('active', el.dataset.cat === id);
+  const navAll = document.getElementById('nav-all-files');
+  if(navAll) navAll.classList.toggle('active', id === '__all__');
+  document.querySelectorAll('.cs-nav-item[data-cat]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-cat') === id);
   });
   render();
 }
 function setStatusFilter(s){
   state.status = s;
-  document.querySelectorAll('.chip[data-status]').forEach(el=>{
-    el.classList.toggle('active', el.dataset.status === s);
-  });
   render();
 }
+
 function populateCategorySelect(){
   const sel = document.getElementById('f-category');
   sel.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.label}</option>`).join('');
 }
 
 /* ================= RENDER ================= */
+/* ================= CLOUDSTRASH ENHANCED RENDER ================= */
+let currentSelectedDocId = null;
+let currentViewMode = localStorage.getItem('cs_view_mode') || 'table';
+
+function setViewMode(mode){
+  currentViewMode = mode;
+  localStorage.setItem('cs_view_mode', mode);
+  const btnTable = document.getElementById('btn-view-table');
+  const btnGrid = document.getElementById('btn-view-grid');
+  if(btnTable) btnTable.classList.toggle('active', mode === 'table');
+  if(btnGrid) btnGrid.classList.toggle('active', mode === 'grid');
+  render();
+}
+
+function selectDoc(docId){
+  currentSelectedDocId = docId;
+  const doc = state.docs.find(d => d.id === docId);
+  updateInspector(doc);
+  document.querySelectorAll('#doc-table-body tr').forEach(tr => {
+    tr.classList.toggle('selected', tr.getAttribute('data-id') === docId);
+  });
+  document.querySelectorAll('#doc-grid .cs-grid-card').forEach(c => {
+    c.classList.toggle('selected', c.getAttribute('data-id') === docId);
+  });
+}
+
+function updateInspector(doc){
+  const box = document.getElementById('insp-preview-box');
+  const title = document.getElementById('insp-title');
+  const date = document.getElementById('insp-edited-date');
+  const tags = document.getElementById('insp-tags');
+  const type = document.getElementById('insp-type');
+  const size = document.getElementById('insp-size');
+  const expiry = document.getElementById('insp-expiry');
+  const notes = document.getElementById('insp-notes');
+
+  if(!doc){
+    if(title) title.textContent = 'Select a document';
+    if(date) date.textContent = 'No file selected';
+    if(box) box.innerHTML = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" style="color:var(--text-faint);"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.5"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="1.5"/></svg>';
+    if(tags) tags.innerHTML = '';
+    if(type) type.textContent = '—';
+    if(size) size.textContent = '—';
+    if(expiry) expiry.textContent = '—';
+    if(notes) notes.textContent = 'No notes attached.';
+    return;
+  }
+
+  if(title) title.textContent = doc.name || doc.fileName || 'Untitled Document';
+  if(date) date.textContent = 'Edited ' + (doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString() : 'recently');
+
+  if(box){
+    const fileUrl = doc.fileDataUrl || doc.dataUrl;
+    if(fileUrl && (doc.fileType && doc.fileType.startsWith('image/') || fileUrl.startsWith('data:image/'))){
+      box.innerHTML = '<img src="' + fileUrl + '" style="width:100%; height:100%; object-fit:cover; border-radius:var(--radius-m);">';
+    } else {
+      box.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; gap:8px;"><div style="color:var(--primary);">' + (ICONS.pdf || '📄') + '</div><span style="font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase;">' + extLabel(doc) + '</span></div>';
+    }
+  }
+
+  if(tags){
+    tags.innerHTML = '<span class="cs-badge-pill" style="background:var(--primary-light); color:var(--primary);">' + getCatLabel(doc.category) + '</span>' +
+                     '<span class="cs-badge-pill" style="background:var(--surface-3); color:var(--text-dim);">' + extLabel(doc) + '</span>' +
+                     (doc.starred ? '<span class="cs-badge-pill" style="background:#FEF3C7; color:#D97706;">★ Starred</span>' : '');
+  }
+
+  if(type) type.textContent = extLabel(doc);
+  if(size) size.textContent = formatDocSize(doc);
+  if(expiry) expiry.textContent = doc.expiry ? new Date(doc.expiry).toLocaleDateString() : 'No Expiry';
+  if(notes) notes.textContent = doc.notes || 'No description notes provided.';
+}
+
+function formatDocSize(doc){
+  if(doc.fileSize) {
+    const bytes = doc.fileSize;
+    if(bytes < 1024) return bytes + ' B';
+    if(bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+  const fileUrl = doc.fileDataUrl || doc.dataUrl;
+  if(fileUrl) {
+    const approx = Math.round(fileUrl.length * 0.75);
+    if(approx < 1048576) return (approx / 1024).toFixed(1) + ' KB';
+    return (approx / 1048576).toFixed(1) + ' MB';
+  }
+  return '—';
+}
+
+function closeInspector(){
+  const insp = document.getElementById('cs-right-inspector');
+  if(insp) insp.classList.remove('show-mobile');
+}
+
+function openFullscreenPreview(){
+  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
+  if(id) openDetail(id);
+}
+function downloadCurrentDoc(){
+  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
+  if(id) downloadDoc(id);
+}
+function editCurrentDoc(){
+  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
+  if(id){
+    const doc = state.docs.find(d => d.id === id);
+    if(doc) openEditModal(doc);
+  }
+}
+function deleteCurrentDoc(){
+  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
+  if(id) deleteDoc(id);
+}
+
 function render(){
-  const q = document.getElementById('search-input').value.trim().toLowerCase();
-  const filtered = state.docs.filter(d=>{
+  const searchInput = document.getElementById('search-input');
+  const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+  const filtered = state.docs.filter(d => {
     if(state.category !== '__all__' && d.category !== state.category) return false;
     const st = computeStatus(d);
     if(state.status !== '__all__' && st !== state.status) return false;
     if(q){
-      const hay = (d.name+' '+getCatLabel(d.category)+' '+(d.notes||'')).toLowerCase();
+      const hay = ((d.name || '') + ' ' + getCatLabel(d.category) + ' ' + (d.notes || '')).toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
   });
 
   const counts = {};
-  CATEGORIES.forEach(c=>counts[c.id]=0);
-  let expiringAny = {}, expiredAny = {};
-  state.docs.forEach(d=>{
-    counts[d.category] = (counts[d.category]||0)+1;
-    const st = computeStatus(d);
-    if(st==='expiring') expiringAny[d.category]=true;
-    if(st==='expired') expiredAny[d.category]=true;
+  CATEGORIES.forEach(c => counts[c.id] = 0);
+  state.docs.forEach(d => {
+    counts[d.category] = (counts[d.category] || 0) + 1;
   });
-  CATEGORIES.forEach(c=>{
-    const el = document.getElementById('count-'+c.id);
-    if(el) el.textContent = counts[c.id] || '';
-    const navItem = document.querySelector(`.nav-item[data-cat="${c.id}"]`);
-    if(navItem){
-      let dotEl = navItem.querySelector('.status-dot');
-      if(expiredAny[c.id] || expiringAny[c.id]){
-        if(!dotEl){
-          dotEl = document.createElement('span');
-          dotEl.className='status-dot';
-          navItem.insertBefore(dotEl, navItem.querySelector('.nav-label'));
-        }
-        dotEl.style.background = expiredAny[c.id] ? 'var(--bad)' : 'var(--warn)';
-      } else if(dotEl){ dotEl.remove(); }
-    }
+
+  CATEGORIES.forEach(c => {
+    const el = document.getElementById('count-' + c.id);
+    if(el) el.textContent = counts[c.id] || 0;
   });
-  document.getElementById('count-all').textContent = state.docs.length;
 
-  const filledCats = CATEGORIES.filter(c=>counts[c.id]>0).length;
-  document.getElementById('view-title').textContent = state.category==='__all__' ? 'All Documents' : getCatLabel(state.category);
-  document.getElementById('view-sub').textContent = state.category==='__all__'
-    ? `${state.docs.length} file${state.docs.length!==1?'s':''} · ${filledCats}/${CATEGORIES.length} categories filled`
-    : `${counts[state.category]||0} file${(counts[state.category]||0)!==1?'s':''}`;
+  const countAll = document.getElementById('count-all');
+  if(countAll) countAll.textContent = state.docs.length;
 
-  document.getElementById('profile-filecount').textContent = state.docs.length;
-  document.getElementById('fill-bar').style.width = Math.round((filledCats/CATEGORIES.length)*100)+'%';
+  const countStarred = document.getElementById('count-starred');
+  if(countStarred) countStarred.textContent = state.docs.filter(d => d.starred).length;
 
+  const countTrash = document.getElementById('count-trash');
+  if(countTrash) countTrash.textContent = state.trash ? state.trash.length : 0;
+
+  // Quick folders counts
+  ['personal', 'passport', 'insurance'].forEach(id => {
+    const qEl = document.getElementById('quick-count-' + id);
+    if(qEl) qEl.textContent = (counts[id] || 0) + ' files';
+  });
+
+  const filledCats = CATEGORIES.filter(c => counts[c.id] > 0).length;
+  const viewTitle = document.getElementById('view-title');
+  if(viewTitle) viewTitle.textContent = state.category === '__all__' ? 'All Files' : getCatLabel(state.category);
+
+  const viewSub = document.getElementById('view-sub');
+  if(viewSub) {
+    viewSub.textContent = state.category === '__all__'
+      ? (state.docs.length + ' file' + (state.docs.length !== 1 ? 's' : ''))
+      : ((counts[state.category] || 0) + ' file' + ((counts[state.category] || 0) !== 1 ? 's' : ''));
+  }
+
+  const profileCount = document.getElementById('profile-filecount');
+  if(profileCount) profileCount.textContent = state.docs.length;
+
+  const fillBar = document.getElementById('fill-bar');
+  if(fillBar) fillBar.style.width = Math.round((filledCats / CATEGORIES.length) * 100) + '%';
+
+  const tableContainer = document.getElementById('cs-table-container');
+  const tableBody = document.getElementById('doc-table-body');
   const grid = document.getElementById('doc-grid');
   const empty = document.getElementById('empty-state');
-  if(filtered.length===0){
-    grid.style.display='none';
-    empty.style.display='flex';
-    if(state.docs.length===0){
-      empty.innerHTML = `${ICONS.all}<h3>No documents yet</h3><p>Add your first document — a passport, license, policy, or anything worth keeping track of.</p>
-        <button class="btn btn-primary" onclick="openAddModal()">Add Document</button>`;
-    } else {
-      empty.innerHTML = `${ICONS.all}<h3>Nothing matches</h3><p>Try a different search or filter.</p>`;
+
+  if(filtered.length === 0){
+    if(tableContainer) tableContainer.style.display = 'none';
+    if(grid) grid.style.display = 'none';
+    if(empty){
+      empty.style.display = 'flex';
+      empty.innerHTML = '<div style="width:48px; height:48px; border-radius:12px; background:var(--surface-3); display:inline-flex; align-items:center; justify-content:center; color:var(--text-faint); margin:0 auto 12px auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="1.8"/></svg></div><h3 style="margin:0 0 6px 0; font-size:16px;">No documents found</h3><p style="margin:0 0 16px 0; font-size:13px; color:var(--text-dim);">Add your first document or drag and drop a file into the upload zone above.</p><button class="btn btn-primary" onclick="openAddModal()">+ Add Document</button>';
     }
+    updateInspector(null);
   } else {
-    grid.style.display='grid';
-    empty.style.display='none';
-    grid.innerHTML = filtered.map(d=>cardHtml(d)).join('');
+    if(empty) empty.style.display = 'none';
+
+    // 1. Render Table Rows
+    if(tableBody){
+      tableBody.innerHTML = filtered.map(d => {
+        const isSelected = d.id === currentSelectedDocId;
+        const modified = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : 'Recent';
+        const fileUrl = d.fileDataUrl || d.dataUrl;
+        const isImg = fileUrl && (d.fileType && d.fileType.startsWith('image/') || fileUrl.startsWith('data:image/'));
+
+        return '<tr data-id="' + d.id + '" class="' + (isSelected ? 'selected' : '') + '" onclick="selectDoc(\'' + d.id + '\')">' +
+          '<td>' +
+            '<div class="cs-file-cell">' +
+              '<div class="cs-file-icon-box">' +
+                (isImg
+                  ? '<img src="' + fileUrl + '" style="width:100%; height:100%; object-fit:cover;">'
+                  : '<div style="color:var(--primary);">' + (ICONS.pdf || '📄') + '</div>') +
+              '</div>' +
+              '<div style="min-width:0;">' +
+                '<div style="font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;">' + escapeHtml(d.name || d.fileName || 'Untitled') + '</div>' +
+                '<div style="font-size:11.5px; color:var(--text-dim);">' + extLabel(d) + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</td>' +
+          '<td><span class="cs-badge-pill" style="background:var(--surface-3); color:var(--text-dim);">' + getCatLabel(d.category) + '</span></td>' +
+          '<td><span style="color:var(--text-dim);">' + modified + '</span></td>' +
+          '<td><span style="color:var(--text-dim);">' + formatDocSize(d) + '</span></td>' +
+          '<td><span style="font-size:12px; color:var(--text-dim);">Synced (KV)</span></td>' +
+          '<td style="text-align:right;">' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); openDetail(\'' + d.id + '\')" title="Preview" style="display:inline-flex; width:28px; height:28px;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8S4 3 8 3S15 8 15 8S12 13 8 13S1 8 1 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg></button>' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); openEditModal(state.docs.find(x=>x.id===\'' + d.id + '\'))" title="Edit" style="display:inline-flex; width:28px; height:28px;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2L14 5L4.5 14.5H1.5V11.5L11 2Z" stroke="currentColor" stroke-width="1.3"/></svg></button>' +
+          '</td>' +
+        '</tr>';
+      }).join('');
+    }
+
+    // 2. Render Grid Cards
+    if(grid){
+      grid.innerHTML = filtered.map(d => {
+        const isSelected = d.id === currentSelectedDocId;
+        const fileUrl = d.fileDataUrl || d.dataUrl;
+        const isImg = fileUrl && (d.fileType && d.fileType.startsWith('image/') || fileUrl.startsWith('data:image/'));
+
+        return '<div class="cs-grid-card ' + (isSelected ? 'selected' : '') + '" data-id="' + d.id + '" onclick="selectDoc(\'' + d.id + '\')">' +
+          '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
+            '<div class="cs-file-icon-box">' +
+              (isImg
+                ? '<img src="' + fileUrl + '" style="width:100%; height:100%; object-fit:cover;">'
+                : '<div style="color:var(--primary);">' + (ICONS.pdf || '📄') + '</div>') +
+            '</div>' +
+            statusBadge(computeStatus(d)) +
+          '</div>' +
+          '<div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:6px; word-break:break-word;">' + escapeHtml(d.name || d.fileName || 'Untitled') + '</div>' +
+          '<div style="display:flex; gap:6px; align-items:center; margin-top:auto; font-size:11.5px; color:var(--text-dim);">' +
+            '<span>' + extLabel(d) + '</span> · <span>' + formatDocSize(d) + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // View Mode Toggle
+    if(currentViewMode === 'table'){
+      if(tableContainer) tableContainer.style.display = 'block';
+      if(grid) grid.style.display = 'none';
+    } else {
+      if(tableContainer) tableContainer.style.display = 'none';
+      if(grid) grid.style.display = 'grid';
+    }
+
+    // Ensure selected doc
+    if(!currentSelectedDocId || !filtered.some(d => d.id === currentSelectedDocId)){
+      currentSelectedDocId = filtered[0].id;
+    }
+    const selDoc = state.docs.find(d => d.id === currentSelectedDocId);
+    updateInspector(selDoc);
   }
 }
 
@@ -3457,39 +3679,55 @@ async function saveDocument(){
     if(targetDoc){
       targetDoc.name = name; targetDoc.category = category; targetDoc.expiry = expiry; targetDoc.notes = notes;
       targetDoc.userKey = userK;
+      targetDoc.updatedAt = new Date().toISOString();
       if(state.fileData){
         targetDoc.fileDataUrl = state.fileData.dataUrl;
         targetDoc.fileName = state.fileData.name;
         targetDoc.fileType = state.fileData.type;
-      } else {
-        targetDoc.fileDataUrl = null; targetDoc.fileName=null; targetDoc.fileType=null;
+        targetDoc.fileSize = state.fileData.size;
       }
     }
   } else {
     targetDoc = {
       id: 'd'+Date.now()+Math.random().toString(36).slice(2,7),
       userKey: userK,
-      name, category, expiry, notes,
+      name: name,
+      category: category,
+      expiry: expiry,
+      notes: notes,
       fileDataUrl: state.fileData ? state.fileData.dataUrl : null,
       fileName: state.fileData ? state.fileData.name : null,
       fileType: state.fileData ? state.fileData.type : null,
+      fileSize: state.fileData ? state.fileData.size : null,
       addedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      starred: false
     };
     state.docs.unshift(targetDoc);
   }
 
-  // Save directly to IndexedDB
-  const ok = targetDoc ? await dbPutDoc(targetDoc) : await saveDocs();
-  if(ok !== false){
-    closeDocModal();
-    render();
-    showToast(state.editingId ? 'Document updated' : 'Document added');
-    const cloudCfg = getCloudConfig();
-    if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
-      syncVaultToCloud(true);
-    }
-  } else {
-    showToast('Failed to save document', true);
+  // Always reset filters so the newly saved document is immediately visible
+  state.category = '__all__';
+  state.status = '__all__';
+  const searchInput = document.getElementById('search-input');
+  if(searchInput) searchInput.value = '';
+
+  currentSelectedDocId = targetDoc ? targetDoc.id : null;
+
+  closeDocModal();
+  render();
+  showToast(state.editingId ? 'Document updated!' : 'Document saved successfully!');
+
+  // Persist directly to storage
+  if(targetDoc) {
+    await dbPutDoc(targetDoc);
+  }
+  await saveDocs();
+
+  // Background Cloud Sync
+  const cloudCfg = getCloudConfig();
+  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
+    syncVaultToCloud(true);
   }
 }
 
