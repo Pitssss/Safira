@@ -1845,7 +1845,7 @@
       <!-- Profile Avatar Pill -->
       <div class="nav-profile-pill" onclick="openProfileModal()" title="Account & Profile Settings">
         <div class="avatar-mini" id="header-avatar-initials">P</div>
-        <span id="header-profile-name" style="font-size:13.5px; font-weight:600; max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Account</span>
+        <span id="header-profile-name" style="font-size:13.5px; font-weight:600; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">User</span>
         <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:var(--text-dim);"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
 
@@ -1893,7 +1893,7 @@
         <div class="profile-card clickable" onclick="openProfileModal()" title="Edit Account & Profile" style="flex:1; margin:0;">
           <div class="avatar" id="avatar-initials">Y</div>
           <div class="profile-meta">
-            <div class="profile-name" id="profile-name">Your vault</div>
+            <div class="profile-name" id="profile-name">User</div>
             <div class="profile-sub"><span id="profile-filecount">0</span> files</div>
           </div>
         </div>
@@ -3215,6 +3215,12 @@ function updateProfile(){
 
   const nameEl = document.getElementById('user-name-display');
   if(nameEl) nameEl.textContent = currentUser.name;
+
+  const profileNameEl = document.getElementById('profile-name');
+  if(profileNameEl) profileNameEl.textContent = currentUser.name || 'User';
+
+  const headerProfileNameEl = document.getElementById('header-profile-name');
+  if(headerProfileNameEl) headerProfileNameEl.textContent = currentUser.name || 'User';
 
   const initials = currentUser.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase() || 'U';
 
