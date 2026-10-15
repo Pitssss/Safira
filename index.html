@@ -1,9 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="en" class="notranslate" translate="no">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Keepsafe — Document Vault</title>
+  <meta name="google" content="notranslate">
+  <meta name="google" content="notranslate" translate="no">
 <meta name="description" content="Keepsafe is a secure, local document vault that keeps your important files safe in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -962,7 +964,7 @@
     <div class="auth-glass">
       <div class="dial" id="dial-login"><div class="pin"></div></div>
       <h1>Welcome back</h1>
-      <p class="sub">Log in to access your document vault.</p>
+      <p class="sub">Log in to access your document vault. Opening on another browser? Enter your name & password to sync.</p>
 
       <div class="auth-tabs">
         <button class="auth-tab" onclick="showSignup()">Sign Up</button>
@@ -1672,6 +1674,23 @@ async function dbDeleteDoc(id){
   }
 }
 
+async function syncLocalDocsWithCloud(userK, incomingDocs){
+  if(!Array.isArray(incomingDocs)) return;
+  const incomingIds = new Set(incomingDocs.map(d => d.id));
+  const currentLocal = await dbGetAllDocs(userK) || [];
+  for(const local of currentLocal){
+    if(!incomingIds.has(local.id)){
+      await dbDeleteDoc(local.id);
+    }
+  }
+  for(const doc of incomingDocs){
+    doc.userKey = userK;
+    await dbPutDoc(doc);
+  }
+  await loadDocs();
+  render();
+}
+
 async function dbClearAllDocs(){
   try{
     const db = await openVaultDB();
@@ -1723,10 +1742,9 @@ async function init(){
     currentUser = users[autoKey];
     currentUser._key = autoKey;
     await enterApp();
-  } else if(hasAnyUser){
-    showLogin();
   } else {
-    showSignup();
+    // Default to Log In so users opening from a new browser can instantly log in to their synced cloud vault
+    showLogin();
   }
 }
 
@@ -1998,13 +2016,8 @@ async function handleLogin(){
     if(cloudData){
       const rawEnc = cloudData.encrypted_data || cloudData;
       const dec = await decryptVaultPayload(rawEnc, hash);
-      if(Array.isArray(dec.docs) && dec.docs.length > 0){
-        for(const doc of dec.docs){
-          doc.userKey = key;
-          await dbPutDoc(doc);
-        }
-        await loadDocs();
-        renderAll();
+      if(Array.isArray(dec.docs)){
+        await syncLocalDocsWithCloud(key, dec.docs);
       }
     }
   }catch(e){
@@ -2459,14 +2472,22 @@ function editCurrentDoc(){
 }
 async function deleteCurrentDoc(){
   const docId = state.detailId;
+  if(!docId) return;
   state.docs = state.docs.filter(d=>d.id!==docId);
   await dbDeleteDoc(docId);
+  if(currentUser && currentUser.docsKey){
+    try {
+      let lDocs = JSON.parse(localStorage.getItem(currentUser.docsKey) || '[]');
+      lDocs = lDocs.filter(d=>d.id!==docId);
+      localStorage.setItem(currentUser.docsKey, JSON.stringify(lDocs));
+    } catch(e){}
+  }
   closeDetailModal();
   render();
   showToast('Document deleted');
   const cloudCfg = getCloudConfig();
   if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
-    syncVaultToCloud(true);
+    await syncVaultToCloud(true);
   }
 }
 function downloadCurrentDoc(){
@@ -3225,7 +3246,7 @@ async function syncVaultToCloud(isSilent = false){
   if(dot) dot.className = 'cloud-status-dot syncing';
 
   const userK = currentUser._key || userKey(currentUser.name);
-  const docs = await dbGetAllDocs(userK) || state.docs;
+  const docs = state.docs;
   const payload = {
     app: 'Keepsafe Vault',
     version: 2,
@@ -3329,270 +3350,8 @@ async function pullFromCloudManual(){
     }
     const decrypted = await decryptVaultPayload(encrypted, currentUser.passHash);
     if(Array.isArray(decrypted.docs)){
-      for(const doc of decrypted.docs){
-        doc.userKey = userK;
-        await dbPutDoc(doc);
-      }
-      await loadDocs();
-      render();
-      showToast(`Restored ${decrypted.docs.length} documents from Cloud!`);
-    }
-  }catch(e){
-    alert('Failed to pull from cloud: ' + e.message);
-  } finally {
-    btn.classList.remove('loading');
-  }
-}
-
-/* --- One-Click File Export & Restore --- */
-async function exportVaultBackupFile(){
-  if(!currentUser) return;
-  const userK = currentUser._key || userKey(currentUser.name);
-  const docs = await dbGetAllDocs(userK) || state.docs;
-  const payload = {
-    app: 'Keepsafe Vault',
-    version: 2,
-    user: currentUser,
-    docs: docs,
-    exportedAt: new Date().toISOString()
-  };
-
-  try{
-    const encrypted = await encryptVaultPayload(payload, currentUser.passHash);
-    const blob = new Blob([JSON.stringify(encrypted, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    const dateStr = new Date().toISOString().slice(0, 10);
-    a.href = URL.createObjectURL(blob);
-    a.download = `keepsafe-vault-${userK}-${dateStr}.vault`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    showToast('Backup file downloaded! You can save it to Google Drive, OneDrive, or USB.');
-  }catch(err){
-    showToast('Export failed: ' + err.message, true);
-  }
-}
-
-async function executeModalFileRestore(){
-  const fileInput = document.getElementById('modal-restore-file');
-  const passInput = document.getElementById('modal-restore-pass');
-  const btn = document.getElementById('modal-restore-btn');
-
-  if(!fileInput.files || fileInput.files.length === 0){
-    showToast('Please select a .vault backup file', true);
-    return;
-  }
-  if(!passInput.value){
-    showToast('Please enter your vault password', true);
-    return;
-  }
-
-  btn.classList.add('loading');
-  try{
-    const file = fileInput.files[0];
-    const text = await file.text();
-    const encrypted = JSON.parse(text);
-    const hash = await sha256(passInput.value);
-    const decrypted = await decryptVaultPayload(encrypted, hash);
-
-    const userK = currentUser._key || userKey(currentUser.name);
-    if(Array.isArray(decrypted.docs)){
-      for(const doc of decrypted.docs){
-        doc.userKey = userK;
-        await dbPutDoc(doc);
-      }
-      await loadDocs();
-      render();
-      closeCloudModal();
-      showToast(`Success! Restored ${decrypted.docs.length} documents from backup file.`);
-    }
-  }catch(err){
-    alert('Incorrect password or corrupted backup file: ' + err.message);
-  } finally {
-    btn.classList.remove('loading');
-  }
-}
-
-/* --- Recovery from Gate (When browser data was wiped) --- */
-async function executeFileRecovery(){
-  const fileInput = document.getElementById('rec-file-input');
-  const passInput = document.getElementById('rec-file-pass');
-  const errEl = document.getElementById('rec-file-error');
-  const btn = document.getElementById('rec-file-btn');
-
-  if(!fileInput.files || fileInput.files.length === 0){
-    errEl.textContent = 'Please select a .vault backup file first.';
-    return;
-  }
-  if(!passInput.value){
-    errEl.textContent = 'Please enter your vault password.';
-    return;
-  }
-
-  errEl.textContent = '';
-  btn.classList.add('loading');
-
-  try{
-    const file = fileInput.files[0];
-    const text = await file.text();
-    const encrypted = JSON.parse(text);
-    const hash = await sha256(passInput.value);
-    const decrypted = await decryptVaultPayload(encrypted, hash);
-
-    if(!decrypted.user){
-      throw new Error('No account data in backup file.');
-    }
-
-    const restoredUser = decrypted.user;
-    const userK = restoredUser._key || userKey(restoredUser.name);
-
-    // Save restored user
-    const users = getUsers();
-    users[userK] = restoredUser;
-    saveUsers(users);
-
-    // Save restored docs to IndexedDB
-    if(Array.isArray(decrypted.docs)){
-      for(const doc of decrypted.docs){
-        doc.userKey = userK;
-        await dbPutDoc(doc);
-      }
-    }
-
-    currentUser = restoredUser;
-    currentUser._key = userK;
-    sessionStorage.setItem(LS_SESSION, userK);
-    localStorage.setItem(LS_REMEMBER, userK);
-
-    closeGateRecoverModal();
-    await enterApp();
-    showToast(`Welcome back! Restored ${decrypted.docs ? decrypted.docs.length : 0} files.`);
-  }catch(err){
-    errEl.textContent = 'Incorrect password or invalid backup file.';
-  } finally {
-    btn.classList.remove('loading');
-  }
-}
-
-async function executeCloudRecovery(){
-  const prov = currentRecProvider;
-  const userName = document.getElementById('rec-cloud-user').value.trim();
-  const pass = document.getElementById('rec-cloud-pass').value;
-  const errEl = document.getElementById('rec-cloud-error');
-  const btn = document.getElementById('rec-cloud-btn');
-
-  let cfg = { provider: prov, autosync: true, syncOnOpen: true };
-
-  if(prov === 'cloudflare'){
-    const cfUrl = document.getElementById('rec-cf-url').value.trim();
-    const cfToken = document.getElementById('rec-cf-token').value.trim();
-    if(!cfUrl || !userName || !pass){
-      errEl.textContent = 'Please complete Worker URL, Username, and Password.';
-      return;
-    }
-    cfg.cfUrl = cfUrl;
-    cfg.url = cfUrl;
-    cfg.cfToken = cfToken;
-  } else {
-    const url = document.getElementById('rec-cloud-url').value.trim();
-    const key = document.getElementById('rec-cloud-key').value.trim();
-    if(!url || !key || !userName || !pass){
-      errEl.textContent = 'Please complete Supabase URL, Key, Username, and Password.';
-      return;
-    }
-    cfg.url = url;
-    cfg.key = key;
-  }
-
-  errEl.textContent = '';
-  btn.classList.add('loading');
-
-  try{
-    const userK = userKey(userName);
-    let encrypted = null;
-    if(prov === 'cloudflare'){
-      encrypted = await pullFromCloudflare(cfg, userK);
-    } else {
-      encrypted = await pullFromSupabase(cfg, userK);
-    }
-
-    if(!encrypted){
-      throw new Error(`No saved vault found in ${prov === 'cloudflare' ? 'Cloudflare' : 'Supabase'} for this user.`);
-    }
-
-    const hash = await sha256(pass);
-    const decrypted = await decryptVaultPayload(encrypted, hash);
-
-    const restoredUser = decrypted.user || {
-      name: userName,
-      passHash: hash,
-      docsKey: 'keepsafe_docs_' + userK,
-      createdAt: new Date().toISOString()
-    };
-
-    const users = getUsers();
-    users[userK] = restoredUser;
-    saveUsers(users);
-
-    saveCloudConfig(cfg);
-
-    if(Array.isArray(decrypted.docs)){
-      for(const doc of decrypted.docs){
-        doc.userKey = userK;
-        await dbPutDoc(doc);
-      }
-    }
-
-    currentUser = restoredUser;
-    currentUser._key = userK;
-    sessionStorage.setItem(LS_SESSION, userK);
-    localStorage.setItem(LS_REMEMBER, userK);
-
-    closeGateRecoverModal();
-    await enterApp();
-    showToast(`Connected to Cloud! Restored ${decrypted.docs ? decrypted.docs.length : 0} files.`);
-  }catch(err){
-    errEl.textContent = err.message || 'Invalid credentials or connection error.';
-  } finally {
-    btn.classList.remove('loading');
-  }
-}
-
-/* --- Auto-Sync on App Reopen / Backgrounding Protection --- */
-async function checkAndAutoSyncOnOpen(){
-  if(!currentUser) return;
-  const cfg = getCloudConfig();
-  if(!isCloudConfigured(cfg) || cfg.syncOnOpen === false) return;
-
-  const userK = currentUser._key || userKey(currentUser.name);
-  const dot = document.getElementById('cloud-status-dot');
-  if(dot) dot.className = 'cloud-status-dot syncing';
-
-  try{
-    const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
-    let encrypted = null;
-    if(prov === 'cloudflare'){
-      encrypted = await pullFromCloudflare(cfg, userK);
-    } else {
-      encrypted = await pullFromSupabase(cfg, userK);
-    }
-
-    if(encrypted){
-      const decrypted = await decryptVaultPayload(encrypted, currentUser.passHash);
-      const cloudTime = new Date(encrypted.updatedAt || 0).getTime();
-      const localTime = new Date(localStorage.getItem(LS_LAST_SYNC) || 0).getTime();
-      const localDocs = await dbGetAllDocs(userK) || [];
-
-      // If cloud is newer or local is empty (e.g. fresh browser / cleared cache)
-      if(cloudTime > localTime || (localDocs.length === 0 && Array.isArray(decrypted.docs) && decrypted.docs.length > 0)){
-        if(Array.isArray(decrypted.docs)){
-          for(const doc of decrypted.docs){
-            doc.userKey = userK;
-            await dbPutDoc(doc);
-          }
-          await loadDocs();
-          render();
-          showToast(`☁️ Synced from Cloud (${decrypted.docs.length} documents)`);
+          await syncLocalDocsWithCloud(userK, decrypted.docs);
+          showToast(`Synced from Cloud (${decrypted.docs.length} documents)`);
         }
       }
     } else {
