@@ -929,7 +929,7 @@
 
 
 
-  /* ================= CLOUDSTRASH DESIGN SYSTEM ================= */
+  /* ================= CLOUDSTRASH MODERN DESIGN ================= */
   :root {
     --bg: #F4F6FB;
     --surface: #FFFFFF;
@@ -1357,7 +1357,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-m);
-    padding: 13px 15px;
+    padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1371,9 +1371,9 @@
     box-shadow: var(--shadow-md);
   }
   .cs-folder-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     background: var(--folder-bg);
     color: var(--folder-gold);
     display: flex;
@@ -1382,32 +1382,32 @@
     flex-shrink: 0;
   }
 
-  /* File Table View (Matches CloudStrash Screenshot) */
+  /* Table View */
   .cs-table-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius-l);
-    overflow: hidden;
+    border-radius: var(--radius-m);
     box-shadow: var(--shadow-sm);
+    overflow: hidden;
   }
   .cs-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13.5px;
+    font-size: 13px;
     text-align: left;
   }
   .cs-table th {
     background: var(--surface-2);
-    padding: 12px 18px;
-    font-size: 11.5px;
+    padding: 12px 16px;
     font-weight: 600;
     color: var(--text-dim);
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 1px solid var(--border);
   }
   .cs-table td {
-    padding: 13px 18px;
+    padding: 13px 16px;
     border-bottom: 1px solid var(--border-soft);
     color: var(--text);
     vertical-align: middle;
@@ -1415,14 +1415,14 @@
   .cs-table tr:last-child td {
     border-bottom: none;
   }
-  .cs-table tr {
-    transition: background 0.12s ease;
+  .cs-table tbody tr {
     cursor: pointer;
+    transition: background 0.12s ease;
   }
-  .cs-table tr:hover {
+  .cs-table tbody tr:hover {
     background: var(--surface-2);
   }
-  .cs-table tr.selected {
+  .cs-table tbody tr.selected {
     background: var(--primary-light);
   }
   .cs-file-cell {
@@ -1488,13 +1488,12 @@
     flex-direction: column;
     flex-shrink: 0;
     overflow-y: auto;
-    transition: transform 0.25s ease, opacity 0.25s ease;
   }
   .cs-inspector-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
   }
   .cs-tab-pills {
     display: flex;
@@ -1612,7 +1611,7 @@
 </div>
 
 <!-- ============ LOG IN GATE ============ -->
-<div class="gate" id="gate-login" style="display:none;">
+<div class="gate" id="gate-login" style="display:flex;">
   <div class="gate-card">
     <div class="auth-glass">
       <div class="dial" id="dial-login"><div class="pin"></div></div>
@@ -1683,15 +1682,15 @@
     <div class="navbar-left">
       <div class="brand-logo" onclick="setCategory('__all__')">
         <div class="brand-icon-box">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6.5 19H17a4.5 4.5 0 001.2-8.84A6 6 0 007 8.5a4.5 4.5 0 00-.5 10.5z" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="currentColor"/></svg>
         </div>
         <span>CloudStrash</span>
       </div>
     </div>
 
-    <!-- Centered Search Bar with ⌘K / Ctrl+K -->
+    <!-- Search Bar with Shortcut -->
     <div class="navbar-search">
-      <svg class="search-icon" width="16" height="16" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6"/><path d="M14 14L18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M11 11L14.5 14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       <input type="text" id="search-input" placeholder="Type or press for search files... ⌘K" oninput="render()">
       <span class="kbd-pill">⌘K</span>
     </div>
@@ -1793,13 +1792,13 @@
       <!-- Drag & Drop Zone -->
       <div class="cs-dropzone" id="cs-main-dropzone" onclick="openAddModal()">
         <div class="cs-dropzone-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 12V18M12 12L9 15M12 12L15 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div style="font-size:14.5px; font-weight:600; color:var(--text); margin-bottom:4px;">
+        <div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:4px;">
           Drag & Drop files here or <span style="color:var(--primary); text-decoration:underline;">Choose file</span>
         </div>
-        <div style="font-size:12.5px; color:var(--text-dim);">
-          Supports PDFs, images, scanned IDs, documents up to ~50MB. Auto AES-256 encrypted.
+        <div style="font-size:12px; color:var(--text-dim);">
+          Supports PDFs, images, spreadsheets, and private documents
         </div>
       </div>
 
@@ -2639,35 +2638,45 @@ function userKey(name){
 }
 
 /* ================= INIT ================= */
+/* ================= INIT ================= */
 async function init(){
-  document.getElementById('ic-all').innerHTML = ICONS.all;
-  document.getElementById('ic-theme').innerHTML = ICONS.theme;
-  document.getElementById('ic-lock').innerHTML = ICONS.logout;
-  document.getElementById('ic-close-doc').innerHTML = ICONS.close;
-  document.getElementById('ic-close-detail').innerHTML = ICONS.close;
-  applyTheme();
+  try {
+    const elIcAll = document.getElementById('ic-all');
+    if(elIcAll && ICONS && ICONS.all) elIcAll.innerHTML = ICONS.all;
+    const elIcTheme = document.getElementById('ic-theme');
+    if(elIcTheme && ICONS && ICONS.theme) elIcTheme.innerHTML = ICONS.theme;
+    const elIcLock = document.getElementById('ic-lock');
+    if(elIcLock && ICONS && ICONS.logout) elIcLock.innerHTML = ICONS.logout;
+    const elIcCloseDoc = document.getElementById('ic-close-doc');
+    if(elIcCloseDoc && ICONS && ICONS.close) elIcCloseDoc.innerHTML = ICONS.close;
+    const elIcCloseDetail = document.getElementById('ic-close-detail');
+    if(elIcCloseDetail && ICONS && ICONS.close) elIcCloseDetail.innerHTML = ICONS.close;
+    applyTheme();
 
-  const users = getUsers();
-  const hasAnyUser = Object.keys(users).length > 0;
+    const users = getUsers();
+    const rememberedKey = localStorage.getItem(LS_REMEMBER);
+    const sessionKey = sessionStorage.getItem(LS_SESSION);
+    const autoKey = rememberedKey || sessionKey;
 
-  // Check remembered session
-  const rememberedKey = localStorage.getItem(LS_REMEMBER);
-  const sessionKey = sessionStorage.getItem(LS_SESSION);
-  const autoKey = rememberedKey || sessionKey;
-
-  if(autoKey && users[autoKey]){
-    currentUser = users[autoKey];
-    currentUser._key = autoKey;
-    await enterApp();
-  } else {
+    if(autoKey && users[autoKey]){
+      currentUser = users[autoKey];
+      currentUser._key = autoKey;
+      await enterApp();
+    } else {
+      showLogin();
+    }
+  } catch(err) {
+    console.error('Init error caught:', err);
     showLogin();
   }
 }
 
 function applyTheme(){
   const t = localStorage.getItem(LS_THEME) || 'dark';
-  if(t==='light'){ document.documentElement.setAttribute('data-theme','light'); }
-  else { document.documentElement.removeAttribute('data-theme'); }
+  if(document.documentElement){
+    if(t==='light'){ document.documentElement.setAttribute('data-theme','light'); }
+    else if(document.documentElement.removeAttribute){ document.documentElement.removeAttribute('data-theme'); }
+  }
   const lbl = document.getElementById('theme-label');
   if(lbl) lbl.textContent = t==='light' ? 'Dark mode' : 'Light mode';
 }
@@ -2680,34 +2689,49 @@ function toggleTheme(){
 /* ================= SCREEN SWITCHING ================= */
 function hideAllGates(){
   ['gate-signup','gate-login','gate-reset'].forEach(id=>{
-    document.getElementById(id).style.display='none';
+    const el = document.getElementById(id);
+    if(el) el.style.display='none';
   });
-  document.getElementById('app').classList.remove('ready');
+  const app = document.getElementById('app');
+  if(app) app.classList.remove('ready');
 }
 
 function showSignup(){
   hideAllGates();
-  document.getElementById('gate-signup').style.display='flex';
+  const gate = document.getElementById('gate-signup');
+  if(gate) gate.style.display='flex';
   const card = document.querySelector('#gate-signup .gate-card');
-  card.style.animation='none';
-  card.offsetHeight;
-  card.style.animation='';
-  setTimeout(()=>document.getElementById('signup-name').focus(), 100);
+  if(card){
+    card.style.animation='none';
+    card.offsetHeight;
+    card.style.animation='';
+  }
+  setTimeout(()=>{
+    const inp = document.getElementById('signup-name');
+    if(inp) inp.focus();
+  }, 100);
 }
 
 function showLogin(){
   hideAllGates();
-  document.getElementById('gate-login').style.display='flex';
+  const gate = document.getElementById('gate-login');
+  if(gate) gate.style.display='flex';
   const card = document.querySelector('#gate-login .gate-card');
-  card.style.animation='none';
-  card.offsetHeight;
-  card.style.animation='';
-  setTimeout(()=>document.getElementById('login-name').focus(), 100);
+  if(card){
+    card.style.animation='none';
+    card.offsetHeight;
+    card.style.animation='';
+  }
+  setTimeout(()=>{
+    const inp = document.getElementById('login-name');
+    if(inp) inp.focus();
+  }, 100);
 }
 
 function showReset(){
   hideAllGates();
-  document.getElementById('gate-reset').style.display='flex';
+  const gate = document.getElementById('gate-reset');
+  if(gate) gate.style.display='flex';
 }
 
 /* ================= AUTH ================= */
@@ -4727,6 +4751,64 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
+
+
+/* ================= KEYBOARD & DRAG LISTENERS ================= */
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    const search = document.getElementById('search-input');
+    if(search) { search.focus(); search.select(); }
+  }
+});
+
+// Setup Main Dropzone
+window.addEventListener('DOMContentLoaded', () => {
+  const dropzone = document.getElementById('cs-main-dropzone');
+  if(dropzone){
+    ['dragenter', 'dragover'].forEach(n => {
+      dropzone.addEventListener(n, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(n => {
+      dropzone.addEventListener(n, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0){
+        openAddModal();
+        handleDroppedFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+});
+
+function handleDroppedFile(file){
+  if(!file) return;
+  const nameField = document.getElementById('f-name');
+  if(nameField && !nameField.value) {
+    nameField.value = file.name.replace(/\.[^/.]+$/, '');
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    state.fileData = {
+      name: file.name,
+      type: file.type || 'application/octet-stream',
+      size: file.size,
+      dataUrl: ev.target.result
+    };
+    showFilePreview(state.fileData);
+  };
+  reader.readAsDataURL(file);
+}
+
+function filterByStarred(){
+  state.category = '__all__';
+  state.status = '__all__';
+  render();
+}
+function filterByTrash(){
+  showToast('Recycle Bin: 0 deleted files.');
+}
 
 </script>
 <script>
