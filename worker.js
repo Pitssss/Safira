@@ -1820,6 +1820,28 @@ async function dbDeleteDoc(id){
   }
 }
 
+
+/* Reconcile local database with authoritative cloud docs (purges deleted files) */
+async function reconcileWithCloudDocs(userK, cloudDocs){
+  if(!Array.isArray(cloudDocs)) return;
+  const localDocs = await dbGetAllDocs(userK) || [];
+  const cloudDocIds = new Set(cloudDocs.map(function(d){ return d.id; }));
+  for(let i = 0; i < localDocs.length; i++){
+    const local = localDocs[i];
+    if(!cloudDocIds.has(local.id)){
+      console.log('Purging deleted file from local DB:', local.id, local.name);
+      await dbDeleteDoc(local.id);
+    }
+  }
+  for(let j = 0; j < cloudDocs.length; j++){
+    const doc = cloudDocs[j];
+    doc.userKey = userK;
+    await dbPutDoc(doc);
+  }
+  state.docs = cloudDocs;
+  render();
+}
+
 async function dbClearAllDocs(){
   try{
     const db = await openVaultDB();
@@ -3496,16 +3518,11 @@ async function pullFromCloudManual(){
       return;
     }
     const decrypted = await decryptVaultPayload(encrypted, currentUser.passHash);
-    if(Array.isArray(decrypted.docs)){
-      for(const doc of decrypted.docs){
-        doc.userKey = userK;
-        await dbPutDoc(doc);
+      if(Array.isArray(decrypted.docs)){
+        await reconcileWithCloudDocs(userK, decrypted.docs);
+        showToast('Restored ' + decrypted.docs.length + ' documents from Cloud!');
       }
-      await loadDocs();
-      render();
-      showToast(\`Restored \${decrypted.docs.length} documents from Cloud!\`);
-    }
-  }catch(e){
+    }catch(e){
     alert('Failed to pull from cloud: ' + e.message);
   } finally {
     btn.classList.remove('loading');
@@ -3747,21 +3764,17 @@ async function checkAndAutoSyncOnOpen(){
 
     if(encrypted){
       const decrypted = await decryptVaultPayload(encrypted, currentUser.passHash);
-      const cloudTime = new Date(encrypted.updatedAt || 0).getTime();
+      const cloudTime = new Date(encrypted.updated_at || encrypted.updatedAt || 0).getTime();
       const localTime = new Date(localStorage.getItem(LS_LAST_SYNC) || 0).getTime();
       const localDocs = await dbGetAllDocs(userK) || [];
+      const cloudDocs = Array.isArray(decrypted.docs) ? decrypted.docs : [];
+      const cloudDocIds = new Set(cloudDocs.map(function(d){ return d.id; }));
+      const hasMismatch = localDocs.length !== cloudDocs.length || localDocs.some(function(d){ return !cloudDocIds.has(d.id); });
 
-      // If cloud is newer or local is empty (e.g. fresh browser / cleared cache)
-      if(cloudTime > localTime || (localDocs.length === 0 && Array.isArray(decrypted.docs) && decrypted.docs.length > 0)){
-        if(Array.isArray(decrypted.docs)){
-          for(const doc of decrypted.docs){
-            doc.userKey = userK;
-            await dbPutDoc(doc);
-          }
-          await loadDocs();
-          render();
-          showToast(\`☁️ Synced from Cloud (\${decrypted.docs.length} documents)\`);
-        }
+      if(cloudTime > localTime || localDocs.length === 0 || hasMismatch){
+        await reconcileWithCloudDocs(userK, cloudDocs);
+        localStorage.setItem(LS_LAST_SYNC, new Date(cloudTime || Date.now()).toISOString());
+        showToast('Synced from Cloud (' + cloudDocs.length + ' ' + (cloudDocs.length === 1 ? 'file' : 'files') + ')');
       }
     } else {
       const localDocs = await dbGetAllDocs(userK) || [];
