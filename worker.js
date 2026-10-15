@@ -1247,7 +1247,7 @@ export default {
 </div>
 
 <!-- ============ ADD/EDIT MODAL ============ -->
-<div class="overlay" id="doc-overlay">
+<div class="overlay" id="doc-overlay" onclick="if(event.target===this) closeDocModal()">
   <div class="modal">
     <div class="modal-head">
       <h2 id="doc-modal-title">Add Document</h2>
@@ -1289,7 +1289,7 @@ export default {
 </div>
 
 <!-- ============ DETAIL MODAL ============ -->
-<div class="overlay" id="detail-overlay">
+<div class="overlay" id="detail-overlay" onclick="if(event.target===this) closeDetailModal()">
 
 <!-- Fullscreen In-App File Preview Lightbox -->
 <div class="overlay" id="preview-lightbox" style="z-index: 2000;" onclick="if(event.target===this) closeFullscreenPreview();">
@@ -1337,7 +1337,7 @@ export default {
 
 
 <!-- ============ GATE RECOVERY MODAL ============ -->
-<div class="overlay" id="gate-recover-overlay">
+<div class="overlay" id="gate-recover-overlay" onclick="if(event.target===this) closeGateRecoverModal()">
   <div class="modal modal-wide">
     <div class="modal-head">
       <div>
@@ -1440,7 +1440,7 @@ export default {
 </div>
 
 <!-- ============ CLOUD & BACKUP MODAL ============ -->
-<div class="overlay" id="cloud-overlay">
+<div class="overlay" id="cloud-overlay" onclick="if(event.target===this) closeCloudModal()">
   <div class="modal modal-wide">
     <div class="modal-head">
       <div>
@@ -1682,6 +1682,27 @@ CREATE POLICY "Allow anon access" ON keepsafe_vault FOR ALL USING (true) WITH CH
 
 
     <script>
+/* ================= TOAST NOTIFICATION SYSTEM ================= */
+let toastTimer = null;
+function showToast(msg, isErr = false){
+  const t = document.getElementById('toast');
+  const txt = document.getElementById('toast-text');
+  if(!t || !txt) return;
+  txt.textContent = msg;
+  const dot = t.querySelector('.dot');
+  if(dot){
+    dot.style.background = isErr ? 'var(--bad, #C9684F)' : 'var(--ok, #6FA97A)';
+  }
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.classList.remove('show');
+  }, 2800);
+}
+function renderAll(){
+  if(typeof render === 'function') render();
+}
+
 /* ================= ICONS ================= */
 const ICONS = {
   all: '<svg viewBox="0 0 16 16" fill="none"><path d="M2 4.5C2 3.67 2.67 3 3.5 3H6.5L8 4.5H12.5C13.33 4.5 14 5.17 14 6V11.5C14 12.33 13.33 13 12.5 13H3.5C2.67 13 2 12.33 2 11.5V4.5Z" stroke="currentColor" stroke-width="1.3"/></svg>',
@@ -2753,6 +2774,28 @@ function checkPlatform() {
 
 init();
 checkPlatform();
+
+/* Click outer backdrop to close modals & Escape key support */
+document.addEventListener('click', (e) => {
+  if(e.target && e.target.classList && e.target.classList.contains('overlay')){
+    if(e.target.id === 'doc-overlay') closeDocModal();
+    else if(e.target.id === 'detail-overlay') closeDetailModal();
+    else if(e.target.id === 'cloud-overlay') closeCloudModal();
+    else if(e.target.id === 'gate-recover-overlay') closeGateRecoverModal();
+    else if(e.target.id === 'preview-lightbox') closeFullscreenPreview();
+    else e.target.classList.remove('show');
+  }
+});
+window.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    closeDocModal();
+    closeDetailModal();
+    closeCloudModal();
+    closeGateRecoverModal();
+    closeFullscreenPreview();
+  }
+});
+
 
 /* ================= CLOUD SYNC & ENCRYPTED BACKUP ENGINE ================= */
 const LS_CLOUD_CONFIG = 'keepsafe_cloud_config_v2';
