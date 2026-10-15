@@ -2001,7 +2001,7 @@
 
       <div id="inspector-content">
         <!-- Preview Box -->
-        <div class="cs-preview-box" id="insp-preview-box">
+        <div class="cs-preview-box" id="insp-preview-box" onclick="openFullscreenPreview()" style="cursor:pointer;" title="Click to view fullscreen">
           <svg width="44" height="44" viewBox="0 0 24 24" fill="none" style="color:var(--text-faint);"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.5"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="1.5"/></svg>
         </div>
 
@@ -2212,9 +2212,33 @@
 
 <!-- ============ DETAIL MODAL ============ -->
 <div class="overlay" id="detail-overlay" onclick="if(event.target===this) closeDetailModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="detail-title">Document</h2>
+      <button class="icon-btn" onclick="closeDetailModal()" id="ic-close-detail">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-file" id="detail-file"></div>
+      <div class="detail-row"><span class="k">Category</span><span class="v" id="detail-category">—</span></div>
+      <div class="detail-row"><span class="k">Status</span><span class="v" id="detail-status">—</span></div>
+      <div class="detail-row"><span class="k">Expires</span><span class="v" id="detail-expiry">—</span></div>
+      <div class="detail-row"><span class="k">Added</span><span class="v" id="detail-added">—</span></div>
+      <div id="detail-notes-wrap" style="display:none;">
+        <div class="detail-row"><span class="k">Notes</span><span></span></div>
+        <div class="detail-notes" id="detail-notes"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="detail-view" onclick="openFullscreenPreview()" style="margin-right:auto;">Open / Preview</button>
+      <button class="btn btn-ghost" id="detail-download" onclick="downloadCurrentDoc()">Download</button>
+      <button class="btn btn-ghost" onclick="editCurrentDoc()">Edit</button>
+      <button class="btn btn-danger-text" onclick="deleteCurrentDoc()">Delete</button>
+    </div>
+  </div>
+</div>
 
-<!-- Fullscreen In-App File Preview Lightbox -->
-<div class="overlay" id="preview-lightbox" style="z-index: 2000;" onclick="if(event.target===this) closeFullscreenPreview();">
+<!-- ============ FULLSCREEN IN-APP FILE PREVIEW LIGHTBOX ============ -->
+<div class="overlay" id="preview-lightbox" style="z-index: 3000;" onclick="if(event.target===this) closeFullscreenPreview();">
   <div style="position:relative; width:94vw; max-width:1200px; height:88vh; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-l); display:flex; flex-direction:column; overflow:hidden; box-shadow:var(--shadow-lift);">
     <div style="padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--surface-2);">
       <div style="display:flex; align-items:center; gap:12px; overflow:hidden;">
@@ -2231,32 +2255,6 @@
     </div>
   </div>
 </div>
-
-  <div class="modal">
-    <div class="modal-head">
-      <h2 id="detail-title">Document</h2>
-      <button class="icon-btn" onclick="closeDetailModal()" id="ic-close-detail"></button>
-    </div>
-    <div class="modal-body">
-      <div class="detail-file" id="detail-file"></div>
-      <div class="detail-row"><span class="k">Category</span><span class="v" id="detail-category">—</span></div>
-      <div class="detail-row"><span class="k">Status</span><span class="v" id="detail-status">—</span></div>
-      <div class="detail-row"><span class="k">Expires</span><span class="v" id="detail-expiry">—</span></div>
-      <div class="detail-row"><span class="k">Added</span><span class="v" id="detail-added">—</span></div>
-      <div id="detail-notes-wrap" style="display:none;">
-        <div class="detail-row"><span class="k">Notes</span><span></span></div>
-        <div class="detail-notes" id="detail-notes"></div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" id="detail-view" onclick="viewCurrentDoc()" style="margin-right:auto;">Open / View</button>
-      <button class="btn btn-ghost" id="detail-download" onclick="downloadCurrentDoc()">Download</button>
-      <button class="btn btn-ghost" onclick="editCurrentDoc()">Edit</button>
-      <button class="btn btn-danger-text" onclick="deleteCurrentDoc()">Delete</button>
-    </div>
-  </div>
-</div>
-
 
 <!-- ============ GATE RECOVERY MODAL ============ -->
 <div class="overlay" id="gate-recover-overlay" onclick="if(event.target===this) closeGateRecoverModal()">
@@ -2774,6 +2772,7 @@ let state = {
   category: '__all__',
   status: '__all__',
   docs: [],
+  trash: [],
   editingId: null,
   detailId: null,
   fileData: null,
@@ -2993,6 +2992,8 @@ async function handleSignup(){
 
   currentUser = users[key];
   currentUser._key = key;
+  currentUser.avatar = currentUser.avatar || localStorage.getItem('keepsafe_avatar_' + key) || null;
+  currentUser.avatarColor = currentUser.avatarColor || localStorage.getItem('keepsafe_avatar_color_' + key) || null;
   sessionStorage.setItem(LS_SESSION, key);
 
   await new Promise(r=>setTimeout(r, 400));
@@ -3122,6 +3123,17 @@ async function handleLogin(){
     if(cloudData){
       const rawEnc = cloudData.encrypted_data || cloudData;
       const dec = await decryptVaultPayload(rawEnc, hash);
+      if(dec.user && dec.user.avatar){
+        currentUser.avatar = dec.user.avatar;
+        users[key].avatar = dec.user.avatar;
+        localStorage.setItem('keepsafe_avatar_' + key, dec.user.avatar);
+        saveUsers(users);
+        updateProfile();
+      }
+      if(Array.isArray(dec.trash)){
+        state.trash = dec.trash;
+        await saveTrash();
+      }
       if(Array.isArray(dec.docs) && dec.docs.length > 0){
         for(const doc of dec.docs){
           doc.userKey = key;
@@ -3178,12 +3190,26 @@ async function enterApp(){
 
 function updateProfile(){
   if(!currentUser) return;
-  const initials = currentUser.name ? currentUser.name.split(' ').map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase() : 'U';
+  const key = currentUser._key || userKey(currentUser.name);
+
+  // Fallback to persisted avatar storage if missing on object
+  if(!currentUser.avatar){
+    currentUser.avatar = localStorage.getItem('keepsafe_avatar_' + key) || (getUsers()[key] && getUsers()[key].avatar) || null;
+  }
+  if(!currentUser.avatarColor){
+    currentUser.avatarColor = localStorage.getItem('keepsafe_avatar_color_' + key) || (getUsers()[key] && getUsers()[key].avatarColor) || null;
+  }
+
+  const nameEl = document.getElementById('user-name-display');
+  if(nameEl) nameEl.textContent = currentUser.name;
+
+  const initials = currentUser.name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase() || 'U';
 
   const avatarEl = document.getElementById('avatar-initials');
   if(avatarEl){
     if(currentUser.avatar){
-      avatarEl.innerHTML = '<img src="' + currentUser.avatar + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      avatarEl.innerHTML = '<img src="' + currentUser.avatar + '" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+      avatarEl.style.background = 'none';
     } else {
       avatarEl.innerHTML = initials;
       avatarEl.style.background = currentUser.avatarColor || 'linear-gradient(155deg,var(--brass-bright),var(--brass-dim))';
@@ -3193,20 +3219,13 @@ function updateProfile(){
   const headerAvatar = document.getElementById('header-avatar-initials');
   if(headerAvatar){
     if(currentUser.avatar){
-      headerAvatar.innerHTML = '<img src="' + currentUser.avatar + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+      headerAvatar.innerHTML = '<img src="' + currentUser.avatar + '" alt="Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+      headerAvatar.style.background = 'none';
     } else {
       headerAvatar.innerHTML = initials;
       headerAvatar.style.background = currentUser.avatarColor || 'linear-gradient(155deg,var(--brass-bright),var(--brass-dim))';
     }
   }
-  const headerName = document.getElementById('header-profile-name');
-  if(headerName) headerName.textContent = currentUser.name || 'Account';
-
-  const pName = document.getElementById('profile-name');
-  if(pName) pName.textContent = currentUser.name || 'Your vault';
-
-  const pCount = document.getElementById('profile-filecount');
-  if(pCount) pCount.textContent = state.docs ? state.docs.length : 0;
 }
 
 
@@ -3321,15 +3340,37 @@ async function saveProfileChanges(){
   btn.classList.add('loading');
 
   const oldKey = currentUser._key || userKey(currentUser.name);
+  const newKey = userKey(newName);
+
   currentUser.name = newName;
   currentUser.email = newEmail;
-  currentUser.avatar = tempAvatarData;
-  currentUser.avatarColor = tempAvatarColor;
+  currentUser.avatar = tempAvatarData || null;
+  currentUser.avatarColor = tempAvatarColor || null;
+  currentUser._key = newKey;
+
+  // Persist avatar independently so it survives logouts and resets
+  if(currentUser.avatar){
+    localStorage.setItem('keepsafe_avatar_' + oldKey, currentUser.avatar);
+    localStorage.setItem('keepsafe_avatar_' + newKey, currentUser.avatar);
+  } else {
+    localStorage.removeItem('keepsafe_avatar_' + oldKey);
+    localStorage.removeItem('keepsafe_avatar_' + newKey);
+  }
+
+  if(currentUser.avatarColor){
+    localStorage.setItem('keepsafe_avatar_color_' + oldKey, currentUser.avatarColor);
+    localStorage.setItem('keepsafe_avatar_color_' + newKey, currentUser.avatarColor);
+  }
 
   // Save to local users storage
   const users = getUsers();
-  users[oldKey] = currentUser;
+  users[newKey] = currentUser;
+  if(newKey !== oldKey) {
+    users[oldKey] = currentUser; // keep old alias mapped so login always succeeds
+  }
   saveUsers(users);
+
+  sessionStorage.setItem(LS_SESSION, newKey);
 
   updateProfile();
   closeProfileModal();
@@ -3344,9 +3385,32 @@ async function saveProfileChanges(){
 }
 
 /* ================= DATA (INDEXEDDB POWERED) ================= */
+async function saveTrash(){
+  if(!currentUser) return;
+  const userK = currentUser._key || userKey(currentUser.name);
+  try {
+    localStorage.setItem('keepsafe_trash_' + userK, JSON.stringify(state.trash || []));
+  } catch(e) {
+    console.warn('LocalStorage trash save notice:', e);
+  }
+}
+
+async function loadTrash(){
+  if(!currentUser) return [];
+  const userK = currentUser._key || userKey(currentUser.name);
+  try {
+    return JSON.parse(localStorage.getItem('keepsafe_trash_' + userK) || '[]');
+  } catch(e) {
+    return [];
+  }
+}
+
 async function loadDocs(){
   if(!currentUser) return;
   const userK = currentUser._key || userKey(currentUser.name);
+
+  // Load Trash
+  state.trash = await loadTrash();
 
   // 1. Try to load from IndexedDB
   const idbDocs = await dbGetAllDocs(userK);
@@ -3358,7 +3422,6 @@ async function loadDocs(){
   }catch(e){ legacyDocs = []; }
 
   if(idbDocs !== null){
-    // Migrate any legacy docs that are not yet in IndexedDB
     if(legacyDocs.length > 0){
       for(const doc of legacyDocs){
         if(!idbDocs.some(d => d.id === doc.id)){
@@ -3367,12 +3430,10 @@ async function loadDocs(){
           idbDocs.push(doc);
         }
       }
-      // Free up localStorage space once migrated!
       try{ localStorage.removeItem(currentUser.docsKey); }catch(e){}
     }
     state.docs = idbDocs.sort((a,b) => (b.addedAt||'').localeCompare(a.addedAt||''));
   } else {
-    // Fallback if IndexedDB is blocked/unavailable in browser
     state.docs = legacyDocs;
   }
 }
@@ -3494,6 +3555,18 @@ function updateInspector(doc){
     return;
   }
 
+  const isTrashItem = state.category === '__trash__' || !!doc.trashedAt;
+  const inspBtnPreview = document.getElementById('insp-btn-preview');
+  if(inspBtnPreview){
+    if(isTrashItem){
+      inspBtnPreview.textContent = '↩ Restore Document';
+      inspBtnPreview.onclick = () => restoreDoc(doc.id);
+    } else {
+      inspBtnPreview.textContent = 'Open / Preview';
+      inspBtnPreview.onclick = () => openFullscreenPreview();
+    }
+  }
+
   if(title) title.textContent = doc.name || doc.fileName || 'Untitled Document';
   if(date) date.textContent = 'Edited ' + (doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString() : 'recently');
 
@@ -3534,15 +3607,38 @@ function formatDocSize(doc){
   return '—';
 }
 
+// ================= UNIFIED DOCUMENT ACTIONS & RECYCLE BIN =================
 function getActiveDoc(preferredId){
-  const targetId = preferredId || currentSelectedDocId || state.detailId || (state.docs && state.docs[0] ? state.docs[0].id : null);
-  if(!targetId) return null;
-  return state.docs.find(d => d.id === targetId) || null;
+  const targetId = preferredId || currentSelectedDocId || state.detailId;
+  if(targetId){
+    const d = state.docs.find(x => x.id === targetId) || (state.trash && state.trash.find(x => x.id === targetId));
+    if(d) return d;
+  }
+  if(state.category === '__trash__' && state.trash && state.trash[0]){
+    return state.trash[0];
+  }
+  return (state.docs && state.docs[0]) ? state.docs[0] : null;
 }
 
 function closeInspector(){
   const insp = document.getElementById('cs-right-inspector') || document.querySelector('.cs-inspector');
   if(insp) insp.classList.remove('show-mobile');
+}
+
+function selectDoc(docId){
+  currentSelectedDocId = docId;
+  state.detailId = docId;
+  const doc = getActiveDoc(docId);
+  updateInspector(doc);
+  document.querySelectorAll('#doc-table-body tr').forEach(tr => {
+    tr.classList.toggle('selected', tr.getAttribute('data-id') === docId);
+  });
+  document.querySelectorAll('#doc-grid .cs-grid-card').forEach(c => {
+    c.classList.toggle('selected', c.getAttribute('data-id') === docId);
+  });
+  if (window.innerWidth <= 960) {
+    openDetail(docId);
+  }
 }
 
 function editDoc(id){
@@ -3591,18 +3687,43 @@ async function deleteDoc(id){
     return;
   }
   const docName = doc.name || doc.title || 'this document';
-  if(!confirm('Are you sure you want to delete "' + docName + '"?')) return;
   const docId = doc.id;
+
+  // In Trash View -> Permanently Delete
+  if(state.category === '__trash__'){
+    if(!confirm('Permanently delete "' + docName + '"? This action cannot be undone.')) return;
+    state.trash = (state.trash || []).filter(d => d.id !== docId);
+    await saveTrash();
+    if(currentSelectedDocId === docId) currentSelectedDocId = state.trash[0] ? state.trash[0].id : null;
+    if(state.detailId === docId) state.detailId = null;
+    closeDetailModal();
+    closeInspector();
+    render();
+    showToast('Permanently deleted from Trash');
+    const cloudCfg = getCloudConfig();
+    if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false) syncVaultToCloud(true);
+    return;
+  }
+
+  // In Normal View -> Move to Trash
   state.docs = state.docs.filter(d => d.id !== docId);
+  if(!state.trash) state.trash = [];
+  const trashedDoc = { ...doc, trashedAt: new Date().toISOString() };
+  state.trash.unshift(trashedDoc);
+
+  await dbDeleteDoc(docId);
+  await saveTrash();
+
   if(currentSelectedDocId === docId) {
     currentSelectedDocId = state.docs[0] ? state.docs[0].id : null;
   }
   if(state.detailId === docId) state.detailId = null;
-  await dbDeleteDoc(docId);
+
   closeDetailModal();
   closeInspector();
   render();
-  showToast('Document deleted');
+  showToast('Moved "' + docName + '" to Trash');
+
   const cloudCfg = getCloudConfig();
   if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
     syncVaultToCloud(true);
@@ -3613,13 +3734,61 @@ async function deleteCurrentDoc(){
   await deleteDoc(currentSelectedDocId || state.detailId);
 }
 
+async function restoreDoc(id){
+  if(!state.trash) return;
+  const doc = state.trash.find(d => d.id === id);
+  if(!doc) return;
+
+  state.trash = state.trash.filter(d => d.id !== id);
+  await saveTrash();
+
+  delete doc.trashedAt;
+  doc.updatedAt = new Date().toISOString();
+  if(currentUser) doc.userKey = currentUser._key || userKey(currentUser.name);
+  state.docs.unshift(doc);
+  await dbPutDoc(doc);
+
+  if(currentSelectedDocId === id) currentSelectedDocId = state.trash[0] ? state.trash[0].id : null;
+  render();
+  showToast('Restored "' + (doc.name || 'document') + '" to files!');
+
+  const cloudCfg = getCloudConfig();
+  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
+    syncVaultToCloud(true);
+  }
+}
+
+async function purgeDoc(id){
+  await deleteDoc(id);
+}
+
+async function emptyTrash(){
+  if(!state.trash || state.trash.length === 0){
+    showToast('Trash is already empty');
+    return;
+  }
+  if(!confirm('Permanently delete all ' + state.trash.length + ' item(s) in Trash? This cannot be undone.')) return;
+  state.trash = [];
+  await saveTrash();
+  currentSelectedDocId = null;
+  state.detailId = null;
+  render();
+  showToast('Trash emptied');
+
+  const cloudCfg = getCloudConfig();
+  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
+    syncVaultToCloud(true);
+  }
+}
+
 async function toggleStar(id, ev){
   if(ev) ev.stopPropagation();
   const doc = state.docs.find(d => d.id === id);
   if(!doc) return;
   doc.starred = !doc.starred;
   doc.updatedAt = new Date().toISOString();
-  await dbSaveDoc(doc);
+  if(currentUser) doc.userKey = currentUser._key || userKey(currentUser.name);
+  await dbPutDoc(doc);
   render();
   showToast(doc.starred ? 'Added to Starred' : 'Removed from Starred');
   const cloudCfg = getCloudConfig();
@@ -3627,13 +3796,20 @@ async function toggleStar(id, ev){
     syncVaultToCloud(true);
   }
 }
+const dbSaveDoc = typeof dbPutDoc !== 'undefined' ? dbPutDoc : function(){};
+
 
 function render(){
   const searchInput = document.getElementById('search-input');
   const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
+  const isTrashView = state.category === '__trash__';
+  const isStarredView = state.category === '__starred__';
 
-  const filtered = state.docs.filter(d => {
-    if(state.category === '__starred__') return !!d.starred;
+  const activeList = isTrashView ? (state.trash || []) : state.docs;
+
+  const filtered = activeList.filter(d => {
+    if(isTrashView) return true;
+    if(isStarredView) return !!d.starred;
     if(state.category !== '__all__' && d.category !== state.category) return false;
     const st = computeStatus(d);
     if(state.status !== '__all__' && st !== state.status) return false;
@@ -3672,13 +3848,17 @@ function render(){
 
   const filledCats = CATEGORIES.filter(c => counts[c.id] > 0).length;
   const viewTitle = document.getElementById('view-title');
-  if(viewTitle) viewTitle.textContent = state.category === '__all__' ? 'All Files' : (state.category === '__starred__' ? 'Starred Files' : getCatLabel(state.category));
+  if(viewTitle) {
+    if(isTrashView) viewTitle.innerHTML = '<span>Trash / Recycle Bin</span>' + (filtered.length > 0 ? ' <button class="btn btn-ghost" onclick="emptyTrash()" style="font-size:12px; padding:3px 10px; margin-left:12px; color:var(--bad);">🗑️ Empty Trash</button>' : '');
+    else if(isStarredView) viewTitle.textContent = 'Starred Files';
+    else if(state.category === '__all__') viewTitle.textContent = 'All Files';
+    else viewTitle.textContent = getCatLabel(state.category);
+  }
 
   const viewSub = document.getElementById('view-sub');
   if(viewSub) {
-    viewSub.textContent = state.category === '__all__'
-      ? (state.docs.length + ' file' + (state.docs.length !== 1 ? 's' : ''))
-      : ((counts[state.category] || 0) + ' file' + ((counts[state.category] || 0) !== 1 ? 's' : ''));
+    const countVal = filtered.length;
+    viewSub.textContent = countVal + ' ' + (isTrashView ? 'deleted item' : 'file') + (countVal !== 1 ? 's' : '');
   }
 
   const profileCount = document.getElementById('profile-filecount');
@@ -3686,6 +3866,23 @@ function render(){
 
   const fillBar = document.getElementById('fill-bar');
   if(fillBar) fillBar.style.width = Math.round((filledCats / CATEGORIES.length) * 100) + '%';
+
+  // Highlight active sidebar navigation
+  document.querySelectorAll('.cs-nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.cs-cat-item').forEach(el => el.classList.remove('active'));
+  if(isTrashView){
+    const trashNav = document.querySelector('.cs-nav-item[onclick*="filterByTrash"]');
+    if(trashNav) trashNav.classList.add('active');
+  } else if(isStarredView){
+    const starNav = document.querySelector('.cs-nav-item[onclick*="filterByStarred"]');
+    if(starNav) starNav.classList.add('active');
+  } else if(state.category === '__all__'){
+    const allNav = document.querySelector('.cs-nav-item[onclick*="__all__"]');
+    if(allNav) allNav.classList.add('active');
+  } else {
+    const catNav = document.querySelector('.cs-cat-item[onclick*="' + state.category + '"]');
+    if(catNav) catNav.classList.add('active');
+  }
 
   const tableContainer = document.getElementById('cs-table-container');
   const tableBody = document.getElementById('doc-table-body');
@@ -3697,7 +3894,11 @@ function render(){
     if(grid) grid.style.display = 'none';
     if(empty){
       empty.style.display = 'flex';
-      empty.innerHTML = '<div style="width:48px; height:48px; border-radius:12px; background:var(--surface-3); display:inline-flex; align-items:center; justify-content:center; color:var(--text-faint); margin:0 auto 12px auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="1.8"/></svg></div><h3 style="margin:0 0 6px 0; font-size:16px;">No documents found</h3><p style="margin:0 0 16px 0; font-size:13px; color:var(--text-dim);">Add your first document or drag and drop a file into the upload zone above.</p><button class="btn btn-primary" onclick="openAddModal()">+ Add Document</button>';
+      if(isTrashView){
+        empty.innerHTML = '<div style="width:48px; height:48px; border-radius:12px; background:var(--surface-3); display:inline-flex; align-items:center; justify-content:center; color:var(--text-faint); margin:0 auto 12px auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 6H21M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6" stroke="currentColor" stroke-width="1.8"/></svg></div><h3 style="margin:0 0 6px 0; font-size:16px;">Trash is empty</h3><p style="margin:0 0 16px 0; font-size:13px; color:var(--text-dim);">Deleted files will appear here and can be restored anytime.</p><button class="btn btn-primary" onclick="setCategory(\'__all__\')">Back to Files</button>';
+      } else {
+        empty.innerHTML = '<div style="width:48px; height:48px; border-radius:12px; background:var(--surface-3); display:inline-flex; align-items:center; justify-content:center; color:var(--text-faint); margin:0 auto 12px auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" stroke-width="1.8"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="1.8"/></svg></div><h3 style="margin:0 0 6px 0; font-size:16px;">No documents found</h3><p style="margin:0 0 16px 0; font-size:13px; color:var(--text-dim);">Add your first document or drag and drop a file into the upload zone above.</p><button class="btn btn-primary" onclick="openAddModal()">+ Add Document</button>';
+      }
     }
     updateInspector(null);
   } else {
@@ -3707,9 +3908,9 @@ function render(){
     if(tableBody){
       tableBody.innerHTML = filtered.map(d => {
         const isSelected = d.id === currentSelectedDocId;
-        const modified = d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : 'Recent';
+        const modified = isTrashView ? ('Deleted ' + (d.trashedAt ? new Date(d.trashedAt).toLocaleDateString() : 'recently')) : (d.updatedAt ? new Date(d.updatedAt).toLocaleDateString() : 'Recent');
         const fileUrl = d.fileDataUrl || d.dataUrl;
-        const isImg = fileUrl && (d.fileType && d.fileType.startsWith('image/') || fileUrl.startsWith('data:image/'));
+        const isImg = fileUrl && ((d.fileType && d.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/'));
 
         return '<tr data-id="' + d.id + '" class="' + (isSelected ? 'selected' : '') + '" onclick="selectDoc(\'' + d.id + '\')">' +
           '<td>' +
@@ -3720,7 +3921,7 @@ function render(){
                   : '<div style="color:var(--primary);">' + (ICONS.pdf || '📄') + '</div>') +
               '</div>' +
               '<div style="min-width:0;">' +
-                '<div style="font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px;">' + escapeHtml(d.name || d.fileName || 'Untitled') + '</div>' +
+                '<div style="font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px;">' + escapeHtml(d.name || d.fileName || 'Untitled') + '</div>' +
                 '<div style="font-size:11.5px; color:var(--text-dim);">' + extLabel(d) + '</div>' +
               '</div>' +
             '</div>' +
@@ -3728,23 +3929,27 @@ function render(){
           '<td><span class="cs-badge-pill" style="background:var(--surface-3); color:var(--text-dim);">' + getCatLabel(d.category) + '</span></td>' +
           '<td class="cs-hide-mobile"><span style="color:var(--text-dim);">' + modified + '</span></td>' +
           '<td class="cs-hide-mobile"><span style="color:var(--text-dim);">' + formatDocSize(d) + '</span></td>' +
-          '<td class="cs-hide-mobile"><span style="font-size:12px; color:var(--text-dim);">Synced (KV)</span></td>' +
+          '<td class="cs-hide-mobile"><span style="font-size:12px; color:var(--text-dim);">' + (isTrashView ? 'In Recycle Bin' : 'Synced (KV)') + '</span></td>' +
           '<td style="text-align:right; white-space:nowrap;">' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); toggleStar(\'' + d.id + '\', event)" title="' + (d.starred ? 'Starred' : 'Star') + '" style="display:inline-flex; width:28px; height:28px; margin-right:4px; color:' + (d.starred ? 'var(--folder-gold)' : 'var(--text-dim)') + ';">' +
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="' + (d.starred ? 'currentColor' : 'none') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-            '</button>' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); openDetail(\'' + d.id + '\')" title="Preview" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
-              '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8S4 3 8 3S15 8 15 8S12 13 8 13S1 8 1 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg>' +
-            '</button>' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); downloadDoc(\'' + d.id + '\')" title="Download" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
-              '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2V11M8 11L4.5 7.5M8 11L11.5 7.5M2 14H14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-            '</button>' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); editDoc(\'' + d.id + '\')" title="Edit" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
-              '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2L14 5L4.5 14.5H1.5V11.5L11 2Z" stroke="currentColor" stroke-width="1.3"/></svg>' +
-            '</button>' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); deleteDoc(\'' + d.id + '\')" title="Delete" style="display:inline-flex; width:28px; height:28px; color:var(--bad);">' +
-              '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4H13M6 4V2.5C6 2.2 6.2 2 6.5 2H9.5C9.8 2 10 2.2 10 2.5V4M5 4V13.5C5 13.8 5.2 14 5.5 14H10.5C10.8 14 11 13.8 11 13.5V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
-            '</button>' +
+            (isTrashView
+              ? '<button class="btn btn-ghost" onclick="event.stopPropagation(); restoreDoc(\'' + d.id + '\')" title="Restore Document" style="font-size:12px; padding:3px 9px; margin-right:6px; color:var(--primary); gap:4px;">↩ Restore</button>' +
+                '<button class="icon-btn" onclick="event.stopPropagation(); purgeDoc(\'' + d.id + '\')" title="Delete permanently" style="display:inline-flex; width:28px; height:28px; color:var(--bad);"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4H13M6 4V2.5C6 2.2 6.2 2 6.5 2H9.5C9.8 2 10 2.2 10 2.5V4M5 4V13.5C5 13.8 5.2 14 5.5 14H10.5C10.8 14 11 13.8 11 13.5V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>'
+              : '<button class="icon-btn" onclick="event.stopPropagation(); toggleStar(\'' + d.id + '\', event)" title="' + (d.starred ? 'Starred' : 'Star') + '" style="display:inline-flex; width:28px; height:28px; margin-right:4px; color:' + (d.starred ? 'var(--folder-gold)' : 'var(--text-dim)') + ';">' +
+                  '<svg width="14" height="14" viewBox="0 0 24 24" fill="' + (d.starred ? 'currentColor' : 'none') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+                '</button>' +
+                '<button class="icon-btn" onclick="event.stopPropagation(); openFullscreenPreview(\'' + d.id + '\')" title="Preview" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
+                  '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8S4 3 8 3S15 8 15 8S12 13 8 13S1 8 1 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg>' +
+                '</button>' +
+                '<button class="icon-btn" onclick="event.stopPropagation(); downloadDoc(\'' + d.id + '\')" title="Download" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
+                  '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2V11M8 11L4.5 7.5M8 11L11.5 7.5M2 14H14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+                '</button>' +
+                '<button class="icon-btn" onclick="event.stopPropagation(); editDoc(\'' + d.id + '\')" title="Edit" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
+                  '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2L14 5L4.5 14.5H1.5V11.5L11 2Z" stroke="currentColor" stroke-width="1.3"/></svg>' +
+                '</button>' +
+                '<button class="icon-btn" onclick="event.stopPropagation(); deleteDoc(\'' + d.id + '\')" title="Move to Trash" style="display:inline-flex; width:28px; height:28px; color:var(--bad);">' +
+                  '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4H13M6 4V2.5C6 2.2 6.2 2 6.5 2H9.5C9.8 2 10 2.2 10 2.5V4M5 4V13.5C5 13.8 5.2 14 5.5 14H10.5C10.8 14 11 13.8 11 13.5V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
+                '</button>'
+            ) +
           '</td>' +
         '</tr>';
       }).join('');
@@ -3755,7 +3960,7 @@ function render(){
       grid.innerHTML = filtered.map(d => {
         const isSelected = d.id === currentSelectedDocId;
         const fileUrl = d.fileDataUrl || d.dataUrl;
-        const isImg = fileUrl && (d.fileType && d.fileType.startsWith('image/') || fileUrl.startsWith('data:image/'));
+        const isImg = fileUrl && ((d.fileType && d.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/'));
 
         return '<div class="cs-grid-card ' + (isSelected ? 'selected' : '') + '" data-id="' + d.id + '" onclick="selectDoc(\'' + d.id + '\')">' +
           '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">' +
@@ -3764,7 +3969,15 @@ function render(){
                 ? '<img src="' + fileUrl + '" style="width:100%; height:100%; object-fit:cover;">'
                 : '<div style="color:var(--primary);">' + (ICONS.pdf || '📄') + '</div>') +
             '</div>' +
-            statusBadge(computeStatus(d)) +
+            '<div style="display:flex; align-items:center; gap:6px;">' +
+              (isTrashView
+                ? '<button class="btn btn-ghost" onclick="event.stopPropagation(); restoreDoc(\'' + d.id + '\')" title="Restore" style="font-size:11px; padding:2px 7px; color:var(--primary);">↩</button>'
+                : '<button class="icon-btn" onclick="event.stopPropagation(); toggleStar(\'' + d.id + '\', event)" title="' + (d.starred ? 'Starred' : 'Star') + '" style="width:26px; height:26px; color:' + (d.starred ? 'var(--folder-gold)' : 'var(--text-dim)') + ';">' +
+                    '<svg width="13" height="13" viewBox="0 0 24 24" fill="' + (d.starred ? 'currentColor' : 'none') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+                  '</button>' +
+                  statusBadge(computeStatus(d))
+              ) +
+            '</div>' +
           '</div>' +
           '<div style="font-size:14px; font-weight:600; color:var(--text); margin-bottom:6px; word-break:break-word;">' + escapeHtml(d.name || d.fileName || 'Untitled') + '</div>' +
           '<div style="display:flex; gap:6px; align-items:center; margin-top:auto; font-size:11.5px; color:var(--text-dim);">' +
@@ -3783,11 +3996,11 @@ function render(){
       if(grid) grid.style.display = 'grid';
     }
 
-    // Ensure selected doc
+    // Update active document in inspector
     if(!currentSelectedDocId || !filtered.some(d => d.id === currentSelectedDocId)){
       currentSelectedDocId = filtered[0].id;
     }
-    const selDoc = state.docs.find(d => d.id === currentSelectedDocId);
+    const selDoc = getActiveDoc(currentSelectedDocId);
     updateInspector(selDoc);
   }
 }
@@ -4044,19 +4257,17 @@ function openFullscreenPreview(id){
     showToast('Select a document to preview');
     return;
   }
+  state.detailId = doc.id;
+  currentSelectedDocId = doc.id;
   const fileUrl = doc.fileDataUrl || doc.dataUrl;
-  if(!fileUrl) {
-    showToast('No attached file for this document');
-    return;
-  }
 
   const docName = escapeHtml(doc.name || doc.title || 'Document');
   const titleEl = document.getElementById('lightbox-title');
   if(titleEl) titleEl.textContent = doc.name || doc.title || 'Document Preview';
   
-  const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
-  const isPdf = (doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf') || (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf'));
-  const isText = (doc.fileType && doc.fileType.startsWith('text/')) || fileUrl.startsWith('data:text/');
+  const isImg = fileUrl && ((doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/'));
+  const isPdf = fileUrl && ((doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf') || (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf')));
+  const isText = fileUrl && ((doc.fileType && doc.fileType.startsWith('text/')) || fileUrl.startsWith('data:text/'));
 
   const bodyEl = document.getElementById('lightbox-body');
   const iconEl = document.getElementById('lightbox-icon');
@@ -4078,20 +4289,33 @@ function openFullscreenPreview(id){
         try { textContent = atob(fileUrl.split(',')[1]); } catch(e2){ textContent = fileUrl; }
       }
       bodyEl.innerHTML = '<pre style="width:100%; height:100%; margin:0; padding:24px; background:var(--surface-2); color:var(--text); border-radius:8px; overflow:auto; font-family:monospace; font-size:14px; line-height:1.6; white-space:pre-wrap;">' + escapeHtml(textContent) + '</pre>';
-    } else {
+    } else if(fileUrl){
       if(iconEl) iconEl.innerHTML = (typeof ICONS !== 'undefined' && ICONS.pdf) ? ICONS.pdf : '📁';
-      bodyEl.innerHTML = '<div style="text-align:center; color:var(--text);"><p style="font-size:16px; margin-bottom:12px;">No direct preview available for this file format.</p><button class="btn btn-primary" onclick="downloadCurrentDoc()">Download File</button></div>';
+      bodyEl.innerHTML = '<div style="text-align:center; color:var(--text); padding:30px;"><div style="font-size:52px; margin-bottom:14px;">📁</div><p style="font-size:16px; margin-bottom:16px;">Attached File: <strong>' + escapeHtml(doc.fileName || doc.name) + '</strong></p><button class="btn btn-primary" onclick="downloadCurrentDoc()">⬇ Download File</button></div>';
+    } else {
+      if(iconEl) iconEl.innerHTML = '📄';
+      bodyEl.innerHTML = '<div style="max-width:520px; width:90%; background:var(--surface); border-radius:var(--radius-m); padding:26px; border:1px solid var(--border); box-shadow:var(--shadow-lift); text-align:left;">' +
+        '<h2 style="margin:0 0 12px 0; font-size:20px; color:var(--text);">' + docName + '</h2>' +
+        '<div style="margin-bottom:8px; font-size:13.5px; color:var(--text-dim);"><strong style="color:var(--text);">Category:</strong> ' + getCatLabel(doc.category) + '</div>' +
+        '<div style="margin-bottom:8px; font-size:13.5px; color:var(--text-dim);"><strong style="color:var(--text);">Expiry:</strong> ' + (doc.expiry || 'No expiry date set') + '</div>' +
+        (doc.notes ? '<div style="margin-top:14px; padding:12px; background:var(--surface-2); border-radius:8px; font-size:13px; color:var(--text); line-height:1.5;">' + escapeHtml(doc.notes) + '</div>' : '') +
+        '<div style="margin-top:22px; display:flex; gap:10px;"><button class="btn btn-primary" onclick="closeFullscreenPreview(); editDoc(\'' + doc.id + '\')">Edit Document</button><button class="btn btn-ghost" onclick="closeFullscreenPreview()">Close</button></div>' +
+      '</div>';
     }
   }
 
   const lb = document.getElementById('preview-lightbox');
-  if(lb) lb.classList.add('show');
+  if(lb) {
+    lb.classList.add('show');
+    lb.style.display = 'flex';
+  }
 }
 
 function closeFullscreenPreview(){
   const lb = document.getElementById('preview-lightbox');
   if(lb){
     lb.classList.remove('show');
+    lb.style.display = 'none';
     const bodyEl = document.getElementById('lightbox-body');
     if(bodyEl) bodyEl.innerHTML = '';
   }
@@ -4821,6 +5045,7 @@ async function syncVaultToCloud(isSilent = false){
     version: 2,
     user: currentUser,
     docs: docs,
+    trash: state.trash || [],
     exportedAt: new Date().toISOString()
   };
 
@@ -5255,7 +5480,9 @@ function filterByStarred(){
   render();
 }
 function filterByTrash(){
-  showToast('Recycle Bin: 0 deleted files.');
+  state.category = state.category === '__trash__' ? '__all__' : '__trash__';
+  state.status = '__all__';
+  render();
 }
 
 </script>
