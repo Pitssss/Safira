@@ -536,6 +536,7 @@
   .detail-notes{margin-top:6px; font-size:13px; color:var(--text-dim); line-height:1.5; white-space:pre-wrap;}
 
   .toast{
+    pointer-events:none;
     position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
     background:var(--surface-3); border:1px solid var(--border); color:var(--text);
     padding:11px 18px; border-radius:var(--radius-s); font-size:13px; z-index:100;
@@ -1556,6 +1557,124 @@
     .cs-main-stage { padding: 16px; }
   }
 
+
+  /* Interactive Button Tactile Response */
+  button, .btn, .icon-btn, .nav-action-icon-btn, .cs-cat-item, .cs-folder-card, .cs-tab-pill, .cs-mobile-nav-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .btn:active, .icon-btn:active, .nav-action-icon-btn:active, .cs-mobile-nav-btn:active, .cs-mobile-nav-fab:active {
+    transform: scale(0.94);
+    transition: transform 0.08s ease;
+  }
+
+  /* Responsive Mobile Bottom Navigation */
+  .cs-mobile-bottom-nav {
+    display: none;
+  }
+
+  @media (max-width: 960px) {
+    .cs-sidebar { display: none !important; }
+    .cs-inspector { display: none !important; }
+    .cs-inspector.show-mobile { 
+      display: flex !important; 
+      position: fixed; 
+      right: 0; 
+      top: 0; 
+      bottom: 0; 
+      width: 100%; 
+      max-width: 360px; 
+      z-index: 200; 
+      box-shadow: -4px 0 24px rgba(0,0,0,0.18); 
+    }
+  }
+
+  @media (max-width: 800px) {
+    .top-navbar { padding: 0 14px; }
+    .navbar-search { display: none; }
+    .cs-main-stage { padding: 14px 14px 88px 14px !important; }
+    .toast { bottom: 82px; }
+
+    .cs-mobile-bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 62px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 100;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    }
+    .cs-mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      flex: 1;
+      height: 100%;
+      transition: color 0.15s ease;
+    }
+    .cs-mobile-nav-btn.active, .cs-mobile-nav-btn:hover {
+      color: var(--primary);
+    }
+    .cs-mobile-nav-fab {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.45);
+      transform: translateY(-8px);
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .cs-mobile-nav-fab:active {
+      transform: translateY(-6px) scale(0.92);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cs-hide-mobile {
+      display: none !important;
+    }
+    .cs-table th, .cs-table td {
+      padding: 10px 10px;
+    }
+    .btn-new-file span {
+      display: none;
+    }
+    .btn-new-file {
+      padding: 8px 11px;
+      border-radius: var(--radius-s);
+    }
+    .brand-logo span {
+      font-size: 16px;
+    }
+    .cs-quick-folders {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -1933,6 +2052,30 @@
     </aside>
   </div>
 </div>
+
+
+  <!-- Native Mobile Bottom Navigation Bar -->
+  <nav class="cs-mobile-bottom-nav" id="mobile-nav">
+    <button class="cs-mobile-nav-btn active" onclick="setCategory('__all__')" id="mob-nav-all">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Files</span>
+    </button>
+    <button class="cs-mobile-nav-btn" onclick="filterByStarred()" id="mob-nav-starred">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Starred</span>
+    </button>
+    <button class="cs-mobile-nav-fab" onclick="openAddModal()" title="Add Document">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </button>
+    <button class="cs-mobile-nav-btn" onclick="toggleTheme()" id="mob-nav-theme">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Theme</span>
+    </button>
+    <button class="cs-mobile-nav-btn" onclick="openProfileModal()" id="mob-nav-profile">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
 
 <!-- ============ ACCOUNT & PROFILE SETTINGS MODAL ============ -->
 <div class="overlay" id="profile-overlay" onclick="if(event.target===this) closeProfileModal()">
@@ -3315,6 +3458,7 @@ function setViewMode(mode){
 
 function selectDoc(docId){
   currentSelectedDocId = docId;
+  state.detailId = docId;
   const doc = state.docs.find(d => d.id === docId);
   updateInspector(doc);
   document.querySelectorAll('#doc-table-body tr').forEach(tr => {
@@ -3323,6 +3467,9 @@ function selectDoc(docId){
   document.querySelectorAll('#doc-grid .cs-grid-card').forEach(c => {
     c.classList.toggle('selected', c.getAttribute('data-id') === docId);
   });
+  if (window.innerWidth <= 960) {
+    openDetail(docId);
+  }
 }
 
 function updateInspector(doc){
@@ -3387,29 +3534,98 @@ function formatDocSize(doc){
   return '—';
 }
 
+function getActiveDoc(preferredId){
+  const targetId = preferredId || currentSelectedDocId || state.detailId || (state.docs && state.docs[0] ? state.docs[0].id : null);
+  if(!targetId) return null;
+  return state.docs.find(d => d.id === targetId) || null;
+}
+
 function closeInspector(){
-  const insp = document.getElementById('cs-right-inspector');
+  const insp = document.getElementById('cs-right-inspector') || document.querySelector('.cs-inspector');
   if(insp) insp.classList.remove('show-mobile');
 }
 
-function openFullscreenPreview(){
-  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
-  if(id) openDetail(id);
+function editDoc(id){
+  const doc = getActiveDoc(id);
+  if(!doc) {
+    showToast('Select a document to edit');
+    return;
+  }
+  closeDetailModal();
+  closeInspector();
+  openEditModal(doc);
 }
-function downloadCurrentDoc(){
-  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
-  if(id) downloadDoc(id);
-}
+
 function editCurrentDoc(){
-  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
-  if(id){
-    const doc = state.docs.find(d => d.id === id);
-    if(doc) openEditModal(doc);
+  editDoc(currentSelectedDocId || state.detailId);
+}
+
+function downloadDoc(id){
+  const doc = getActiveDoc(id);
+  if(!doc) {
+    showToast('Select a document to download');
+    return;
+  }
+  const fileUrl = doc.fileDataUrl || doc.dataUrl;
+  if(!fileUrl){
+    showToast('No attached file for this document');
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = fileUrl;
+  a.download = doc.fileName || doc.name || doc.title || 'document';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showToast('Downloading ' + (doc.name || 'document'));
+}
+
+function downloadCurrentDoc(){
+  downloadDoc(currentSelectedDocId || state.detailId);
+}
+
+async function deleteDoc(id){
+  const doc = getActiveDoc(id);
+  if(!doc) {
+    showToast('Select a document to delete');
+    return;
+  }
+  const docName = doc.name || doc.title || 'this document';
+  if(!confirm('Are you sure you want to delete "' + docName + '"?')) return;
+  const docId = doc.id;
+  state.docs = state.docs.filter(d => d.id !== docId);
+  if(currentSelectedDocId === docId) {
+    currentSelectedDocId = state.docs[0] ? state.docs[0].id : null;
+  }
+  if(state.detailId === docId) state.detailId = null;
+  await dbDeleteDoc(docId);
+  closeDetailModal();
+  closeInspector();
+  render();
+  showToast('Document deleted');
+  const cloudCfg = getCloudConfig();
+  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
+    syncVaultToCloud(true);
   }
 }
-function deleteCurrentDoc(){
-  const id = currentSelectedDocId || (state.docs[0] ? state.docs[0].id : null);
-  if(id) deleteDoc(id);
+
+async function deleteCurrentDoc(){
+  await deleteDoc(currentSelectedDocId || state.detailId);
+}
+
+async function toggleStar(id, ev){
+  if(ev) ev.stopPropagation();
+  const doc = state.docs.find(d => d.id === id);
+  if(!doc) return;
+  doc.starred = !doc.starred;
+  doc.updatedAt = new Date().toISOString();
+  await dbSaveDoc(doc);
+  render();
+  showToast(doc.starred ? 'Added to Starred' : 'Removed from Starred');
+  const cloudCfg = getCloudConfig();
+  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
+    syncVaultToCloud(true);
+  }
 }
 
 function render(){
@@ -3417,6 +3633,7 @@ function render(){
   const q = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
   const filtered = state.docs.filter(d => {
+    if(state.category === '__starred__') return !!d.starred;
     if(state.category !== '__all__' && d.category !== state.category) return false;
     const st = computeStatus(d);
     if(state.status !== '__all__' && st !== state.status) return false;
@@ -3455,7 +3672,7 @@ function render(){
 
   const filledCats = CATEGORIES.filter(c => counts[c.id] > 0).length;
   const viewTitle = document.getElementById('view-title');
-  if(viewTitle) viewTitle.textContent = state.category === '__all__' ? 'All Files' : getCatLabel(state.category);
+  if(viewTitle) viewTitle.textContent = state.category === '__all__' ? 'All Files' : (state.category === '__starred__' ? 'Starred Files' : getCatLabel(state.category));
 
   const viewSub = document.getElementById('view-sub');
   if(viewSub) {
@@ -3509,12 +3726,25 @@ function render(){
             '</div>' +
           '</td>' +
           '<td><span class="cs-badge-pill" style="background:var(--surface-3); color:var(--text-dim);">' + getCatLabel(d.category) + '</span></td>' +
-          '<td><span style="color:var(--text-dim);">' + modified + '</span></td>' +
-          '<td><span style="color:var(--text-dim);">' + formatDocSize(d) + '</span></td>' +
-          '<td><span style="font-size:12px; color:var(--text-dim);">Synced (KV)</span></td>' +
-          '<td style="text-align:right;">' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); openDetail(\'' + d.id + '\')" title="Preview" style="display:inline-flex; width:28px; height:28px;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8S4 3 8 3S15 8 15 8S12 13 8 13S1 8 1 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg></button>' +
-            '<button class="icon-btn" onclick="event.stopPropagation(); openEditModal(state.docs.find(x=>x.id===\'' + d.id + '\'))" title="Edit" style="display:inline-flex; width:28px; height:28px;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2L14 5L4.5 14.5H1.5V11.5L11 2Z" stroke="currentColor" stroke-width="1.3"/></svg></button>' +
+          '<td class="cs-hide-mobile"><span style="color:var(--text-dim);">' + modified + '</span></td>' +
+          '<td class="cs-hide-mobile"><span style="color:var(--text-dim);">' + formatDocSize(d) + '</span></td>' +
+          '<td class="cs-hide-mobile"><span style="font-size:12px; color:var(--text-dim);">Synced (KV)</span></td>' +
+          '<td style="text-align:right; white-space:nowrap;">' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); toggleStar(\'' + d.id + '\', event)" title="' + (d.starred ? 'Starred' : 'Star') + '" style="display:inline-flex; width:28px; height:28px; margin-right:4px; color:' + (d.starred ? 'var(--folder-gold)' : 'var(--text-dim)') + ';">' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="' + (d.starred ? 'currentColor' : 'none') + '"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); openDetail(\'' + d.id + '\')" title="Preview" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
+              '<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M1 8S4 3 8 3S15 8 15 8S12 13 8 13S1 8 1 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.3"/></svg>' +
+            '</button>' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); downloadDoc(\'' + d.id + '\')" title="Download" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
+              '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2V11M8 11L4.5 7.5M8 11L11.5 7.5M2 14H14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+            '</button>' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); editDoc(\'' + d.id + '\')" title="Edit" style="display:inline-flex; width:28px; height:28px; margin-right:4px;">' +
+              '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2L14 5L4.5 14.5H1.5V11.5L11 2Z" stroke="currentColor" stroke-width="1.3"/></svg>' +
+            '</button>' +
+            '<button class="icon-btn" onclick="event.stopPropagation(); deleteDoc(\'' + d.id + '\')" title="Delete" style="display:inline-flex; width:28px; height:28px; color:var(--bad);">' +
+              '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4H13M6 4V2.5C6 2.2 6.2 2 6.5 2H9.5C9.8 2 10 2.2 10 2.5V4M5 4V13.5C5 13.8 5.2 14 5.5 14H10.5C10.8 14 11 13.8 11 13.5V4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>' +
+            '</button>' +
           '</td>' +
         '</tr>';
       }).join('');
@@ -3808,44 +4038,21 @@ function formatDate(iso){
   const d = new Date(iso+'T00:00:00');
   return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
 }
-function editCurrentDoc(){
-  const doc = state.docs.find(d=>d.id===state.detailId);
-  closeDetailModal();
-  openEditModal(doc);
-}
-async function deleteCurrentDoc(){
-  const docId = state.detailId;
-  state.docs = state.docs.filter(d=>d.id!==docId);
-  await dbDeleteDoc(docId);
-  closeDetailModal();
-  render();
-  showToast('Document deleted');
-  const cloudCfg = getCloudConfig();
-  if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
-    syncVaultToCloud(true);
+function openFullscreenPreview(id){
+  const doc = getActiveDoc(id);
+  if(!doc) {
+    showToast('Select a document to preview');
+    return;
   }
-}
-function downloadCurrentDoc(){
-  const doc = state.docs.find(d=>d.id===state.detailId);
-  if(!doc) return;
   const fileUrl = doc.fileDataUrl || doc.dataUrl;
-  if(!fileUrl) return;
-  const a = document.createElement('a');
-  a.href = fileUrl;
-  a.download = doc.fileName || doc.name || doc.title || 'document';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-function openFullscreenPreview(){
-  const doc = state.docs.find(d=>d.id===state.detailId);
-  if(!doc) return;
-  const fileUrl = doc.fileDataUrl || doc.dataUrl;
-  if(!fileUrl) return;
+  if(!fileUrl) {
+    showToast('No attached file for this document');
+    return;
+  }
 
   const docName = escapeHtml(doc.name || doc.title || 'Document');
-  document.getElementById('lightbox-title').textContent = doc.name || doc.title || 'Document Preview';
+  const titleEl = document.getElementById('lightbox-title');
+  if(titleEl) titleEl.textContent = doc.name || doc.title || 'Document Preview';
   
   const isImg = (doc.fileType && doc.fileType.startsWith('image/')) || fileUrl.startsWith('data:image/');
   const isPdf = (doc.fileType === 'application/pdf') || fileUrl.startsWith('data:application/pdf') || (doc.fileName && doc.fileName.toLowerCase().endsWith('.pdf'));
@@ -3854,28 +4061,31 @@ function openFullscreenPreview(){
   const bodyEl = document.getElementById('lightbox-body');
   const iconEl = document.getElementById('lightbox-icon');
 
-  if(isImg){
-    iconEl.innerHTML = ICONS.img || '🖼️';
-    bodyEl.innerHTML = `<img src="${fileUrl}" alt="${docName}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.6);">`;
-  } else if(isPdf){
-    iconEl.innerHTML = ICONS.pdf || '📄';
-    bodyEl.innerHTML = `<iframe src="${fileUrl}#view=FitH" style="width:100%; height:100%; border:none; border-radius:8px; background:#ffffff;"></iframe>`;
-  } else if(isText){
-    iconEl.innerHTML = '📝';
-    let textContent = '';
-    try {
-      const base64Part = fileUrl.split(',')[1];
-      textContent = decodeURIComponent(escape(atob(base64Part)));
-    } catch(e){
-      try { textContent = atob(fileUrl.split(',')[1]); } catch(e2){ textContent = fileUrl; }
+  if(bodyEl){
+    if(isImg){
+      if(iconEl) iconEl.innerHTML = (typeof ICONS !== 'undefined' && ICONS.img) ? ICONS.img : '🖼️';
+      bodyEl.innerHTML = '<img src="' + fileUrl + '" alt="' + docName + '" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.6);">';
+    } else if(isPdf){
+      if(iconEl) iconEl.innerHTML = (typeof ICONS !== 'undefined' && ICONS.pdf) ? ICONS.pdf : '📄';
+      bodyEl.innerHTML = '<iframe src="' + fileUrl + '#view=FitH" style="width:100%; height:100%; border:none; border-radius:8px; background:#ffffff;"></iframe>';
+    } else if(isText){
+      if(iconEl) iconEl.innerHTML = '📝';
+      let textContent = '';
+      try {
+        const base64Part = fileUrl.split(',')[1];
+        textContent = decodeURIComponent(escape(atob(base64Part)));
+      } catch(e){
+        try { textContent = atob(fileUrl.split(',')[1]); } catch(e2){ textContent = fileUrl; }
+      }
+      bodyEl.innerHTML = '<pre style="width:100%; height:100%; margin:0; padding:24px; background:var(--surface-2); color:var(--text); border-radius:8px; overflow:auto; font-family:monospace; font-size:14px; line-height:1.6; white-space:pre-wrap;">' + escapeHtml(textContent) + '</pre>';
+    } else {
+      if(iconEl) iconEl.innerHTML = (typeof ICONS !== 'undefined' && ICONS.pdf) ? ICONS.pdf : '📁';
+      bodyEl.innerHTML = '<div style="text-align:center; color:var(--text);"><p style="font-size:16px; margin-bottom:12px;">No direct preview available for this file format.</p><button class="btn btn-primary" onclick="downloadCurrentDoc()">Download File</button></div>';
     }
-    bodyEl.innerHTML = `<pre style="width:100%; height:100%; margin:0; padding:24px; background:var(--surface-2); color:var(--text); border-radius:8px; overflow:auto; font-family:monospace; font-size:14px; line-height:1.6; white-space:pre-wrap;">${escapeHtml(textContent)}</pre>`;
-  } else {
-    iconEl.innerHTML = ICONS.pdf || '📁';
-    bodyEl.innerHTML = `<div style="text-align:center; color:var(--text);"><p style="font-size:16px; margin-bottom:12px;">No direct preview available for this file format.</p><button class="btn btn-primary" onclick="downloadCurrentDoc()">Download File</button></div>`;
   }
 
-  document.getElementById('preview-lightbox').classList.add('show');
+  const lb = document.getElementById('preview-lightbox');
+  if(lb) lb.classList.add('show');
 }
 
 function closeFullscreenPreview(){
@@ -5040,7 +5250,7 @@ function handleDroppedFile(file){
 }
 
 function filterByStarred(){
-  state.category = '__all__';
+  state.category = state.category === '__starred__' ? '__all__' : '__starred__';
   state.status = '__all__';
   render();
 }
