@@ -130,6 +130,7 @@ export default {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Keepsafe — Document Vault</title>
+  <meta name="google" content="notranslate">
 <meta name="description" content="Keepsafe is a secure, local document vault that keeps your important files safe in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1798,23 +1799,6 @@ async function dbDeleteDoc(id){
   }
 }
 
-async function syncLocalDocsWithCloud(userK, incomingDocs){
-  if(!Array.isArray(incomingDocs)) return;
-  const incomingIds = new Set(incomingDocs.map(d => d.id));
-  const currentLocal = await dbGetAllDocs(userK) || [];
-  for(const local of currentLocal){
-    if(!incomingIds.has(local.id)){
-      await dbDeleteDoc(local.id);
-    }
-  }
-  for(const doc of incomingDocs){
-    doc.userKey = userK;
-    await dbPutDoc(doc);
-  }
-  await loadDocs();
-  render();
-}
-
 async function dbClearAllDocs(){
   try{
     const db = await openVaultDB();
@@ -1866,10 +1850,8 @@ async function init(){
     currentUser = users[autoKey];
     currentUser._key = autoKey;
     await enterApp();
-  } else if(hasAnyUser){
-    showLogin();
   } else {
-    showSignup();
+    showLogin();
   }
 }
 
@@ -2141,8 +2123,13 @@ async function handleLogin(){
     if(cloudData){
       const rawEnc = cloudData.encrypted_data || cloudData;
       const dec = await decryptVaultPayload(rawEnc, hash);
-      if(Array.isArray(dec.docs)){
-        await syncLocalDocsWithCloud(key, dec.docs);
+      if(Array.isArray(dec.docs) && dec.docs.length > 0){
+        for(const doc of dec.docs){
+          doc.userKey = key;
+          await dbPutDoc(doc);
+        }
+        await loadDocs();
+        renderAll();
       }
     }
   }catch(e){
@@ -2597,22 +2584,14 @@ function editCurrentDoc(){
 }
 async function deleteCurrentDoc(){
   const docId = state.detailId;
-  if(!docId) return;
   state.docs = state.docs.filter(d=>d.id!==docId);
   await dbDeleteDoc(docId);
-  if(currentUser && currentUser.docsKey){
-    try {
-      let lDocs = JSON.parse(localStorage.getItem(currentUser.docsKey) || '[]');
-      lDocs = lDocs.filter(d=>d.id!==docId);
-      localStorage.setItem(currentUser.docsKey, JSON.stringify(lDocs));
-    } catch(e){}
-  }
   closeDetailModal();
   render();
   showToast('Document deleted');
   const cloudCfg = getCloudConfig();
   if(isCloudConfigured(cloudCfg) && cloudCfg.autosync !== false){
-    await syncVaultToCloud(true);
+    syncVaultToCloud(true);
   }
 }
 function downloadCurrentDoc(){
@@ -3475,9 +3454,14 @@ async function pullFromCloudManual(){
     }
     const decrypted = await decryptVaultPayload(encrypted, currentUser.passHash);
     if(Array.isArray(decrypted.docs)){
-          await syncLocalDocsWithCloud(userK, decrypted.docs);
-          showToast(☁️ Synced from Cloud ( documents));
-        }
+      for(const doc of decrypted.docs){
+        doc.userKey = userK;
+        await dbPutDoc(doc);
+      }
+      await loadDocs();
+      render();
+      showToast(\`Restored \${decrypted.docs.length} documents from Cloud!\`);
+    }
   }catch(e){
     alert('Failed to pull from cloud: ' + e.message);
   } finally {
@@ -3489,7 +3473,7 @@ async function pullFromCloudManual(){
 async function exportVaultBackupFile(){
   if(!currentUser) return;
   const userK = currentUser._key || userKey(currentUser.name);
-  const docs = await dbGetAllDocs(userK) || state.docs;
+  const docs = state.docs;
   const payload = {
     app: 'Keepsafe Vault',
     version: 2,
