@@ -1,1 +1,12 @@
-
+node_modules
+.git
+.wrangler
+package.json
+package-lock.json
+wrangler.json
+wrangler.jsonc
+wrangler.toml
+worker.js
+README.md
+.gitignore
+.assetsignore
