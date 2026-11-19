@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>CloudStrash — Document Vault</title>
+<!-- PWA & Taskbar Icons -->
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4IiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InNhZmlyYS1ncmFkIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzNCODJGNiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM2MzY2RjEiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxMjQiIGhlaWdodD0iMTI0IiB4PSIyIiB5PSIyIiByeD0iMjgiIGZpbGw9InVybCgjc2FmaXJhLWdyYWQpIi8+CiAgPHBhdGggZD0iTTE5LjM1IDEwLjA0QzE4LjY3IDYuNTkgMTUuNjQgNCAxMiA0IDkuMTEgNCA2LjYgNS42NCA1LjM1IDguMDQgMi4zNCA4LjM2IDAgMTAuOTEgMCAxNGMwIDMuMzEgMi42OSA2IDYgNmgxM2MyLjc2IDAgNS0yLjI0IDUtNSAwLTIuNjQtMi4wNS00Ljc4LTQuNjUtNC45NnoiIGZpbGw9IiNmZmZmZmYiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDIwLCAyMykgc2NhbGUoMy42NikiLz4KPC9zdmc+">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#3B82F6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Safira">
 <meta name="google" content="notranslate">
 <meta name="description" content="CloudStrash is a secure, modern document vault with zero-knowledge AES-256 client-side encryption.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -4945,14 +4958,20 @@ function removeFile(){
 function handleFileSelect(e){
   const file = e.target.files[0];
   if(!file) return;
-  if(file.size > 50*1024*1024){
-    showToast('File too large — keep under ~50MB', true);
-    e.target.value='';
+  const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB safe limit for cloud KV sync
+  if(file.size > MAX_FILE_SIZE){
+    showToast('File too large — keep under 15MB for secure sync', true);
+    e.target.value = '';
     return;
   }
   const reader = new FileReader();
   reader.onload = function(ev){
-    state.fileData = {dataUrl: ev.target.result, name: file.name, type: file.type};
+    state.fileData = {
+      dataUrl: ev.target.result,
+      name: file.name,
+      type: file.type || 'application/octet-stream',
+      size: file.size
+    };
     showFilePreview(state.fileData);
     if(!document.getElementById('f-name').value){
       document.getElementById('f-name').value = file.name;
@@ -5333,24 +5352,24 @@ function saveCloudConfig(cfg){
 }
 
 /* --- Web Crypto E2EE AES-GCM Helpers --- */
-function bufferToBase64(buf){
-  const bytes = new Uint8Array(buf);
-  let binary = '';
-  const len = bytes.byteLength;
-  const chunk = 8192;
-  for(let i = 0; i < len; i += chunk){
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunk, len)));
-  }
-  return btoa(binary);
+async function bufferToBase64(buf){
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([buf], { type: 'application/octet-stream' });
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      const b64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      resolve(b64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
-function base64ToBuffer(b64){
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for(let i = 0; i < binary.length; i++){
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
+async function base64ToBuffer(b64){
+  const res = await fetch('data:application/octet-stream;base64,' + b64);
+  const ab = await res.arrayBuffer();
+  return new Uint8Array(ab);
 }
 
 async function deriveVaultKey(secret, salt){
@@ -5386,9 +5405,9 @@ async function encryptVaultPayload(payloadObj, secret){
   return {
     version: 2,
     magic: 'KEEPSAFE_ENCRYPTED_VAULT',
-    salt: bufferToBase64(salt),
-    iv: bufferToBase64(iv),
-    ciphertext: bufferToBase64(cipherBuf),
+    salt: await bufferToBase64(salt),
+    iv: await bufferToBase64(iv),
+    ciphertext: await bufferToBase64(cipherBuf),
     updatedAt: new Date().toISOString()
   };
 }
@@ -5397,9 +5416,9 @@ async function decryptVaultPayload(encryptedObj, secret){
   if(!encryptedObj || !encryptedObj.ciphertext || !encryptedObj.salt || !encryptedObj.iv){
     throw new Error('Invalid encrypted vault data format');
   }
-  const salt = base64ToBuffer(encryptedObj.salt);
-  const iv = base64ToBuffer(encryptedObj.iv);
-  const cipherBytes = base64ToBuffer(encryptedObj.ciphertext);
+  const salt = await base64ToBuffer(encryptedObj.salt);
+  const iv = await base64ToBuffer(encryptedObj.iv);
+  const cipherBytes = await base64ToBuffer(encryptedObj.ciphertext);
   const key = await deriveVaultKey(secret, salt);
   const decryptedBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBytes);
   const jsonStr = new TextDecoder().decode(decryptedBuf);
@@ -5419,22 +5438,36 @@ async function pushToCloudflare(cfg, userKeyStr, encryptedData){
   const token = cfg.cfToken || cfg.key;
   if(token) headers['X-Sync-Secret'] = token;
 
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify({
-      user_id: userKeyStr,
-      encrypted_data: encryptedData,
-      updated_at: new Date().toISOString()
-    })
-  });
-  if(!res.ok){
-    const errText = await res.text();
-    let msg = errText;
-    try { const parsed = JSON.parse(errText); if(parsed.error) msg = parsed.error; }catch(e){}
-    throw new Error(`Cloudflare Worker Error (${res.status}): ${msg}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35000);
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        user_id: userKeyStr,
+        encrypted_data: encryptedData,
+        updated_at: new Date().toISOString()
+      })
+    });
+    clearTimeout(timeoutId);
+
+    if(!res.ok){
+      const errText = await res.text();
+      let msg = errText;
+      try { const parsed = JSON.parse(errText); if(parsed.error) msg = parsed.error; }catch(e){}
+      throw new Error(`Cloudflare Worker Error (${res.status}): ${msg}`);
+    }
+    return true;
+  } catch(err) {
+    clearTimeout(timeoutId);
+    if(err.name === 'AbortError') {
+      throw new Error('Cloudflare Worker request timed out after 35 seconds. Payload may be too large.');
+    }
+    throw err;
   }
-  return true;
 }
 
 async function pullFromCloudflare(cfg, userKeyStr){
@@ -5914,6 +5947,19 @@ async function syncVaultToCloud(isSilent = false){
 
   try{
     const encrypted = await encryptVaultPayload(payload, currentUser.passHash);
+    const serializedPayload = JSON.stringify({
+      user_id: userK,
+      encrypted_data: encrypted,
+      updated_at: new Date().toISOString()
+    });
+
+    if(serializedPayload.length > 20 * 1024 * 1024){
+      console.warn('Vault size exceeds 20MB Cloudflare limit:', serializedPayload.length);
+      if(dot) dot.className = 'cloud-status-dot warn';
+      if(!isSilent) showToast('Vault size exceeds 20MB limit. Cloud sync paused.', true);
+      return false;
+    }
+
     const prov = cfg.provider || (cfg.cfUrl ? 'cloudflare' : (cfg.url && cfg.url.includes('supabase') ? 'supabase' : 'cloudflare'));
     if(prov === 'cloudflare'){
       await pushToCloudflare(cfg, userK, encrypted);
@@ -6320,6 +6366,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function handleDroppedFile(file){
   if(!file) return;
+  const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB safe limit for cloud KV sync
+  if(file.size > MAX_FILE_SIZE){
+    showToast('File too large — keep under 15MB for secure sync', true);
+    return;
+  }
   const nameField = document.getElementById('f-name');
   if(nameField && !nameField.value) {
     nameField.value = file.name.replace(/\.[^/.]+$/, '');
